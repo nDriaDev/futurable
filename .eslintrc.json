@@ -1,0 +1,40 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+		"prettier"
+    ],
+    "overrides": [
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+		"ecmaFeatures": {
+			"tsx": true
+		},
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "plugins": [
+        "@typescript-eslint",
+		"prettier"
+    ],
+    "rules": {
+		"camelcase": "error",
+		"no-alert": "error",
+		"no-console": "error",
+		"no-duplicate-imports": "error",
+		"@typescript-eslint/ban-ts-comment": "off",
+		"@typescript-eslint/no-empty-function": "off",
+		"@typescript-eslint/no-explicit-any": "off"
+    },
+	"settings": {
+		"import/resolver": {
+			"typescript": {}
+		}
+	}
+}
