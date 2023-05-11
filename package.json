@@ -11,13 +11,22 @@
 		"lint:fix": "eslint --fix 'src/**/*.{jsx,ts,tsx}'",
 		"format": "prettier --write src//**/*.{ts,tsx,css} --config ./.prettierrc"
 	},
+	"engines": {
+		"node": ">=16.13.2"
+	},
 	"files": [
 		"dist"
 	],
 	"exports": {
 		".": {
+			"types": "./dist/index.d.ts",
 			"import": "./dist/futurable.es.js",
-			"require": "./dist/futurable.umd.js"
+			"require": "./dist/futurable.umd.js",
+			"node": {
+				"types": "./dist/index.d.ts",
+				"require": "./dist/futurable.cjs.js",
+				"import": "./dist/futurable.es.js"
+			}
 		}
 	},
 	"main": "./dist/futurable.umd.js",

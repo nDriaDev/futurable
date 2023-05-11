@@ -1,24 +1,53 @@
-const FUTURABLE_STATUS: FuturableStatus = {
-	PENDING: "pending",
-	FULFILLED: "fulfilled",
-	REJECTED: "rejected"
-};
+export type FuturableOnfulfilled<T, TResult2 = never> = ((value: any) => T | TResult2 | FuturableLike<T | TResult2> | PromiseLike<T | TResult2>) | undefined | null;
+
+export type FuturableOnrejected<TResult = never> = ((reason: any) => TResult | FuturableLike<TResult> | PromiseLike<TResult>) | undefined | null;
+
+export type FuturableResolveType<T> = T | FuturableLike<T> | PromiseLike<T>;
+
+export interface FuturableResolve<T> {
+	(value?: FuturableResolveType<T>): void;
+}
+
+export interface FuturableReject {
+	(reason?: any): void;
+}
+
+export interface FuturableUtils<T> {
+	signal: AbortSignal;
+	cancel: () => void;
+	onAbort: (cb: () => void) => void;
+	delay: (cb: () => any, timer: number) => Futurable<T>;
+	sleep: (timer: number) => Futurable<T>;
+	fetch: (url: string, opts: RequestInit) => Futurable<T>;
+}
+
+export type FuturableExecutor<T> = (
+	resolve: FuturableResolve<T>,
+	reject: FuturableReject,
+	utils: FuturableUtils<T>
+) => void;
+
+export type FuturableIterable = Futurable<any> | Promise<any> | any;
+
+export interface FuturableLike<T> {
+	then<TResult1 = T, TResult2 = never>(onfulfilled?: FuturableOnfulfilled<TResult1, TResult2>, onrejected?: FuturableOnrejected<TResult2>): FuturableLike<TResult1 | TResult2>;
+}
+
+
+export enum FUTURABLE_STATUS {
+	PENDING = "pending",
+	FULFILLED = "fulfilled",
+	REJECTED = "rejected"
+}
 
 export class Futurable<T> extends Promise<T> {
-	#controller: AbortController|null;
-	#signal: AbortSignal;
-	#idsTimeout: ReturnType<typeof setTimeout>[];
+	#controller;
+	#signal;
+	#idsTimeout;
 
-	constructor(
-		executor: ((
-			resolve: (value?: void | Response | T | PromiseLike<T>) => void,
-			reject: (reason?: any) => void,
-			utils: { signal: AbortSignal, cancel: () => void, onAbort: (cb: () => void) => void, delay: (cb: () => void, timer: number) => Futurable<T>, sleep: (timer: number) => Futurable<T>, fetch: (url: string, opts: RequestInit) => Futurable<T> }
-		) => void),
-		signal: AbortSignal
-	) {
-		const controller = signal ? null : new AbortController();
-		const sign = signal || controller?.signal;
+	constructor(executor: FuturableExecutor<T>, signal?: AbortSignal) {
+		const controller: AbortController | null = signal ? null : new AbortController();
+		const sign = signal || controller!.signal;
 		const idsTimeout: ReturnType<typeof setTimeout>[] = [];
 
 		const abortTimeout = () => {
@@ -27,42 +56,46 @@ export class Futurable<T> extends Promise<T> {
 			}
 		};
 
-		let abort: ()=>void;
+		let abort: () => void;
 
-		const onAbort = (cb:()=>void):void => {
+		const onAbort = (cb: () => void): void => {
 			abort = cb;
 		};
 
 		const utils = {
 			signal: sign,
-			cancel: () => this.#controller?.abort(),
+			cancel: (): void => this.#controller?.abort(),
 			onAbort,
-			delay: (cb:()=>void, timer:number):Futurable<T> => {
+			delay: (cb: () => any, timer: number): Futurable<T> => {
 				return new Futurable(res => {
-					idsTimeout.push(setTimeout(() => res(cb()), timer));
+					idsTimeout.push(setTimeout(() => {
+						res(cb());
+					}, timer));
 				}, sign);
 			},
-			sleep: (timer:number) => {
+			sleep: (timer: number): Futurable<T> => {
 				return utils.delay(() => { }, timer);
 			},
-			fetch: (url:string, opts: RequestInit):Futurable<T> => {
+			fetch: (url: string, opts: RequestInit): Futurable<T> => {
 				return new Futurable((res, rej) => {
-					fetch(url, { ...(opts || {}), signal: sign }).then(res).catch(err => {
-						if (err.name === "AbortError") {
-							return;
-						} else {
-							rej(err);
-						}
-					});
+					fetch(url, { ...(opts || {}), signal: sign })
+						.then(val => res(val as FuturableResolveType<T>))
+						.catch(err => {
+							if (err.name === "AbortError") {
+								return;
+							} else {
+								rej(err);
+							}
+						});
 				}, sign);
 			}
 		};
 
 		let status = FUTURABLE_STATUS.PENDING;
 
-		const p = new Promise((resolve: (value?: void | Response | T | PromiseLike<T>)=>void, reject: (reason?:any)=>any) => {
+		const p = new Promise((resolve, reject) => {
 			if (!sign.aborted) {
-				const func: (()=>void) = typeof sign.onabort === "function" ? sign.onabort as ()=>void : () => { };
+				const func: (() => void) = typeof sign.onabort === "function" ? sign.onabort as () => void : () => { };
 				sign.onabort = () => {
 					func();
 					abortTimeout();
@@ -72,12 +105,12 @@ export class Futurable<T> extends Promise<T> {
 					return;
 				};
 
-				const res = (value?: void | Response | T | PromiseLike<T>):void => {
+				const res = (val?: FuturableResolveType<T>) => {
 					status = FUTURABLE_STATUS.FULFILLED;
-					resolve(value);
+					resolve(val);
 				};
 
-				const rej = (reason: any):void => {
+				const rej = (reason?: any) => {
 					status = FUTURABLE_STATUS.REJECTED;
 					reject(reason);
 				};
@@ -90,7 +123,7 @@ export class Futurable<T> extends Promise<T> {
 			}
 		});
 		super((resolve, reject) => {
-			p.then(value => resolve(value as T | PromiseLike<T>)).catch(reject);
+			p.then(val => resolve(val as FuturableResolveType<T>)).catch(reject);
 		});
 		this.#controller = controller;
 		this.#signal = sign;
@@ -115,9 +148,8 @@ export class Futurable<T> extends Promise<T> {
 		}
 	}
 
-	then(onFulfilled: { (value?: void | T | Response | PromiseLike<T> | undefined): void; (value: void | T | Response | undefined): void; (val: T): void; (): void; (val: any): void; (val: any): void; (val: any): any; (val: any): void; (arg0: T): any; } | null | undefined, onRejected: { (reason: any): void; (): void; (reason: any): void; (reason: any): any; (reason: any): void; (arg0: any): any; } | undefined) {
-		let resolve: (value?: void | Response | T | PromiseLike<T>) => void,
-			reject: (reason?: any) => void;
+	then<TResult1 = T, TResult2 = never>(onFulfilled: FuturableOnfulfilled<TResult1, TResult2>, onRejected?: FuturableOnrejected<TResult2>): Futurable<TResult1 | TResult2> {
+		let resolve: FuturableResolve<TResult1 | TResult2>, reject: FuturableReject;
 		const p = new Futurable((res, rej) => {
 			resolve = res;
 			reject = rej;
@@ -132,7 +164,7 @@ export class Futurable<T> extends Promise<T> {
 				if (onFulfilled) {
 					resolve(onFulfilled(val));
 				} else {
-					resolve(val);
+					resolve(val as unknown as (TResult1 | undefined));
 				}
 			} catch (error) {
 				reject(error);
@@ -155,11 +187,11 @@ export class Futurable<T> extends Promise<T> {
 		return p;
 	}
 
-	catch(onRejected: { (reason: any): void; (): void; (reason: any): void; (reason: any): any; (reason: any): void; (arg0: any): any; } | undefined) {
+	catch<TResult = never>(onRejected: FuturableOnrejected<TResult>): Futurable<T | TResult> {
 		return this.then(null, onRejected);
 	}
 
-	finally(onFinally: () => void) {
+	finally(onFinally: () => void): Futurable<void> {
 		return this.then(
 			() => {
 				onFinally();
@@ -170,34 +202,31 @@ export class Futurable<T> extends Promise<T> {
 		);
 	}
 
-	cancel() {
+	cancel(): void {
 		!this.#signal?.aborted && this.#controller?.abort();
 	}
 
-	delay(cb:()=>void, timer:number) {
-		let resolve, reject;
-		const p = new Futurable((res, rej) => {
+	delay<TResult1 = T, TResult2 = never>(cb: (val?: TResult1) => any, timer: number): Futurable<TResult1 | TResult2> {
+		let resolve: FuturableResolve<TResult1 | TResult2>;
+		const p = new Futurable(res => {
 			resolve = res;
-			reject = rej;
 		}, this.#signal);
 		p.#controller = this.#controller;
 		this.then(
 			val => {
 				this.#idsTimeout.push(setTimeout(() => resolve(cb(val)), timer));
 			},
-			reason => {
-				this.#idsTimeout.push(setTimeout(() => resolve(cb(reason)), timer));
-			},
+			null
 		);
 		return p;
 	}
 
-	sleep(timer) {
+	sleep<TResult1 = T, TResult2 = never>(timer: number): Futurable<TResult1 | TResult2> {
 		return this.delay(val => val, timer);
 	}
 
-	fetch(url, opts) {
-		let resolve, reject;
+	fetch<TResult1 = T, TResult2 = never>(url: string | ((val?: TResult1) => string), opts: object | RequestInit | ((val?: TResult1) => RequestInit)): Futurable<TResult1 | TResult2> {
+		let resolve: FuturableResolve<TResult1 | TResult2>, reject: FuturableReject;
 		const p = new Futurable((res, rej) => {
 			resolve = res;
 			reject = rej;
@@ -207,7 +236,7 @@ export class Futurable<T> extends Promise<T> {
 			const urlFetch = typeof url === "function" ? url(val) : url,
 				optsFetch = { ...(typeof opts === "function" ? opts(val) : opts), signal: this.#signal };
 
-			fetch(urlFetch, optsFetch).then(resolve).catch(err => {
+			fetch(urlFetch, optsFetch).then(val => resolve(val as FuturableResolveType<TResult1 | TResult2>)).catch(err => {
 				if (err.name === "AbortError") {
 					return;
 				} else {
@@ -218,14 +247,13 @@ export class Futurable<T> extends Promise<T> {
 		return p;
 	}
 
-	onAbort(cb) {
-		let resolve,
-			reject,
-			f = new Futurable((res, rej, utils) => {
-				utils.onAbort(cb);
-				resolve = res;
-				reject = rej;
-			}, this.#signal);
+	onAbort<TResult1 = T, TResult2 = never>(cb: () => void): Futurable<TResult1 | TResult2> {
+		let resolve: FuturableResolve<TResult1 | TResult2>, reject: FuturableReject;
+		const f = new Futurable((res, rej, utils) => {
+			utils.onAbort(cb);
+			resolve = res;
+			reject = rej;
+		}, this.#signal);
 		f.#controller = this.#controller;
 
 		this.then(
@@ -235,7 +263,7 @@ export class Futurable<T> extends Promise<T> {
 		return f;
 	}
 
-	promisify() {
+	promisify<TResult1 = T, TResult2 = never>(): Promise<TResult1 | TResult2> {
 		return new Promise((res, rej) => {
 			if (this.#signal.aborted) {
 				this.#clearTimeout();
@@ -249,47 +277,48 @@ export class Futurable<T> extends Promise<T> {
 		});
 	}
 
-	static resolve(value, signal) {
+	static resolve(value?: any, signal?: AbortSignal): Futurable<any> {
 		return new Futurable(res => res(value), signal);
 	}
 
-	static reject(reason, signal) {
+	static reject(reason?: any, signal?: AbortSignal): Futurable<any> {
 		return new Futurable((res, rej) => rej(reason), signal);
 	}
 
-	static onAbort(cb, signal) {
+	static onAbort(cb: () => void, signal?: AbortSignal): Futurable<any> {
 		return new Futurable((res, rej, utils) => {
 			utils.onAbort(() => res(cb()));
 		}, signal);
 	}
 
-	static delay(cb, timer) {
-		let timeout = timer, signal;
+	static delay(cb: () => any, timer: number | { timer: number, signal?: AbortSignal }): Futurable<any> {
+		let timeout: any = timer, signal;
 		if (typeof timer === "object") {
 			timeout = timer.timer;
 			signal = timer?.signal;
 		}
-		return Futurable.resolve(true, signal).delay(cb, timeout);
+		return Futurable.resolve(true, signal).delay(cb, timeout as number);
 	}
 
-	static sleep(timer) {
+	static sleep(timer: number | { timer: number, signal?: AbortSignal }): Futurable<any> {
 		return Futurable.delay(() => { }, timer);
 	}
 
-	static fetch(url, opts = {}) {
-		const signal = opts?.signal || null;
+	static fetch(url: string, opts: RequestInit): Futurable<any> {
+		const signal = opts?.signal || undefined;
 		opts?.signal && delete opts.signal;
 		return Futurable.resolve(true, signal)
 			.fetch(url, opts);
 	}
 
-	static #handleIterables(iterables, signal) {
-		let resolve, reject, array = [];
-		const f = new Futurable((res, rej, utils) => {
+	static #handleIterables(iterables: FuturableIterable[], signal?: AbortSignal) {
+		let resolve, reject;
+		const array: (Futurable<any> | any)[] = [];
+		const f = new Futurable<any>((res, rej, utils) => {
 			resolve = res;
 			reject = rej;
 			utils.onAbort(() => {
-				for (let promise of array) {
+				for (const promise of array) {
 					promise.signal !== signal && promise.cancel();
 				}
 			});
@@ -313,7 +342,7 @@ export class Futurable<T> extends Promise<T> {
 		return { f, resolve, reject, array };
 	}
 
-	static all(iterables, signal) {
+	static all(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<any> {
 		const { f, resolve, reject, array } = Futurable.#handleIterables(iterables, signal);
 
 		super.all(array).then(resolve).catch(reject);
@@ -321,7 +350,7 @@ export class Futurable<T> extends Promise<T> {
 		return f;
 	}
 
-	static allSettled(iterables, signal) {
+	static allSettled(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<any> {
 		const { f, resolve, reject, array } = Futurable.#handleIterables(iterables, signal);
 
 		super.allSettled(array).then(resolve).catch(reject);
@@ -329,7 +358,7 @@ export class Futurable<T> extends Promise<T> {
 		return f;
 	}
 
-	static race(iterables, signal) {
+	static race(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<any> {
 		const { f, resolve, reject, array } = Futurable.#handleIterables(iterables, signal);
 
 		super.race(array).then(resolve).catch(reject);
@@ -337,7 +366,7 @@ export class Futurable<T> extends Promise<T> {
 		return f;
 	}
 
-	static any(iterables, signal) {
+	static any(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<any> {
 		const { f, resolve, reject, array } = Futurable.#handleIterables(iterables, signal);
 
 		super.any(array).then(resolve).catch(reject);
