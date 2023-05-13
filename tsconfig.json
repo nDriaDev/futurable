@@ -22,13 +22,13 @@
 		"declarationMap": true,
 		"baseUrl": ".",
 		"paths": {
-			"react-vite-library": [
+			"futurable": [
 				"src/index.ts"
 			]
 		},
 		"typeRoots": [
 			"node_modules/@types",
-			"src/index.d.ts"
+			"src/index.ts"
 		]
 	},
 	"include": [

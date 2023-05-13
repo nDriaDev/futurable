@@ -18,7 +18,7 @@ export interface FuturableUtils<T> {
 	onAbort: (cb: () => void) => void;
 	delay: (cb: () => any, timer: number) => Futurable<T>;
 	sleep: (timer: number) => Futurable<T>;
-	fetch: (url: string, opts: RequestInit) => Futurable<T>;
+	fetch: (url: string, opts?: RequestInit) => Futurable<T>;
 }
 
 export type FuturableExecutor<T> = (
@@ -76,7 +76,7 @@ export class Futurable<T> extends Promise<T> {
 			sleep: (timer: number): Futurable<T> => {
 				return utils.delay(() => { }, timer);
 			},
-			fetch: (url: string, opts: RequestInit): Futurable<T> => {
+			fetch: (url: string, opts?: RequestInit): Futurable<T> => {
 				return new Futurable((res, rej) => {
 					fetch(url, { ...(opts || {}), signal: sign })
 						.then(val => res(val as FuturableResolveType<T>))
@@ -225,7 +225,7 @@ export class Futurable<T> extends Promise<T> {
 		return this.delay(val => val, timer);
 	}
 
-	fetch<TResult1 = T, TResult2 = never>(url: string | ((val?: TResult1) => string), opts: object | RequestInit | ((val?: TResult1) => RequestInit)): Futurable<TResult1 | TResult2> {
+	fetch<TResult1 = T, TResult2 = never>(url: string | ((val?: TResult1) => string), opts?: object | RequestInit | ((val?: TResult1) => RequestInit)): Futurable<TResult1 | TResult2> {
 		let resolve: FuturableResolve<TResult1 | TResult2>, reject: FuturableReject;
 		const p = new Futurable((res, rej) => {
 			resolve = res;
@@ -304,7 +304,7 @@ export class Futurable<T> extends Promise<T> {
 		return Futurable.delay(() => { }, timer);
 	}
 
-	static fetch(url: string, opts: RequestInit): Futurable<any> {
+	static fetch(url: string, opts?: RequestInit): Futurable<any> {
 		const signal = opts?.signal || undefined;
 		opts?.signal && delete opts.signal;
 		return Futurable.resolve(true, signal)
