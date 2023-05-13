@@ -207,16 +207,19 @@ export class Futurable<T> extends Promise<T> {
 	}
 
 	delay<TResult1 = T, TResult2 = never>(cb: (val?: TResult1) => any, timer: number): Futurable<TResult1 | TResult2> {
-		let resolve: FuturableResolve<TResult1 | TResult2>;
-		const p = new Futurable(res => {
+		let resolve: FuturableResolve<TResult1 | TResult2>, reject: FuturableReject;
+		const p = new Futurable((res, rej) => {
 			resolve = res;
+			reject = rej;
 		}, this.#signal);
 		p.#controller = this.#controller;
 		this.then(
 			val => {
 				this.#idsTimeout.push(setTimeout(() => resolve(cb(val)), timer));
 			},
-			null
+			reason => {
+				reject(reason);
+			}
 		);
 		return p;
 	}
