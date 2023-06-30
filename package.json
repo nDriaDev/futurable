@@ -1,9 +1,12 @@
 {
 	"name": "futurable",
+	"description": "Extension Javascript's Promise API with more functionalities",
 	"private": false,
-	"version": "0.0.0",
+	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
+		"preinstall": "node ./scripts/preinstall.js --foreground-script",
+		"postinstall": "echo 'postinstall executed'",
 		"build": "tsc && vite build",
 		"test": "NODE_OPTIONS=--experimental-vm-modules jest",
 		"lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
@@ -16,13 +19,15 @@
 		"node": ">=16.13.2"
 	},
 	"files": [
-		"dist/"
+		"dist/",
+		"scripts"
 	],
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/futurable.es.js",
-			"require": "./dist/futurable.umd.js",
+			"require": "./dist/futurable.cjs.js",
+			"default": "./dist/futurable.umd.js",
 			"node": {
 				"types": "./dist/index.d.ts",
 				"require": "./dist/futurable.cjs.js",
@@ -53,12 +58,16 @@
 		"vite-plugin-linter": "^2.0.2",
 		"vite-tsconfig-paths": "^4.2.0"
 	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/nDriaDev/futurable"
-	},
 	"keywords": [
 		"promise",
+		"promises",
+		"promises-a",
+		"promises-aplus",
+		"async",
+		"await",
+		"deferred",
+		"deferreds",
+		"future",
 		"cancel",
 		"abort",
 		"delay",
@@ -67,10 +76,19 @@
 		"cancelable",
 		"futurable"
 	],
-	"author": "nDriaDev",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nDriaDev/futurable"
+	},
+	"author": {
+		"name": "Andrea Cosentino",
+		"email": "andreacosentino.work@gmail.com",
+		"url": "https://github.com/nDriaDev/"
+	},
+	"readmeFilename": "README.md",
 	"bugs": {
 		"url": "https://github.com/nDriaDev/futurable/issues"
 	},
-	"homepage": "https://github.com/nDriaDev/futurable#readme",
+	"homepage": "https://github.com/nDriaDev/futurable",
 	"license": "MIT"
 }
