@@ -53,8 +53,7 @@ const { Futurable } = require('futurable');	// ok
 Thanks to the use of this library, there is a simple and effective way to be able to cancel an Api request executed in a useEffect which, due to the Strict Mode, is executed twice:
 ```jsx
 export default function Component() {
-	....
-	....
+	//...code
 
 	useEffect(() => {
         const f;
@@ -90,8 +89,7 @@ export default function Component() {
         }
     },[])
 
-	....
-	....
+	//...code
 }
 ```
 
@@ -177,16 +175,15 @@ function asynchronousOperation() {
 	});
 );
 
-....
-....
+//...code
 
 const futurable = asynchronousOperation();
 	futurable.then(value => {
 	//DO anything
 });
 
-....
-....
+//...code
+
 futurable.cancel();
 ```
 
@@ -201,8 +198,7 @@ const futurable = new Futurable((resolve, reject, utils) => {
 	resolve(data);
 });
 
-...
-...
+//...code
 
 futurable.cancel();
 
@@ -213,15 +209,13 @@ const futurable = new Futurable((res, rej) => {
 	resolve(true);
 });
 
-...
-...
+//...code
 
 f
 .onCancel(() => console.log("Futurable cancelled"))
 .then(val => .......);
 
-...
-...
+//...code
 
 f.cancel();
 ```
@@ -239,8 +233,7 @@ const futurable = new Futurable((resolve, reject, utils) => {
 	utils.sleep(3000);
 	resolve(data);
 });
-...
-...
+//...code
 
 //OR
 
@@ -249,15 +242,13 @@ const futurable = new Futurable((res, rej) => {
 	resolve(true);
 });
 
-...
-...
+//...code
 
 f
 .sleep(3000)
 .then(val => .......);
 
-...
-...
+//...code
 ```
 
 ### delay(cb: callback, timer: number)
@@ -270,8 +261,7 @@ const futurable = new Futurable((resolve, reject, utils) => {
 	resolve(data);
 });
 
-...
-...
+//...code
 
 //OR
 
@@ -280,8 +270,7 @@ const futurable = new Futurable((res, rej) => {
 	resolve(true);
 });
 
-...
-...
+//...code
 
 f
 .delay((val)=> {
@@ -290,8 +279,7 @@ f
 },3000)
 .then(val => .......);
 
-...
-...
+//...code
 ```
 
 ### fetch(url: string, opts: object | RequestInit)
@@ -304,8 +292,7 @@ const futurable = new Futurable((resolve, reject, utils) => {
 	.then(val => resolve(val))
 });
 
-...
-...
+//...code
 
 //OR
 
@@ -314,15 +301,13 @@ const futurable = new Futurable((res, rej) => {
 	resolve(true);
 });
 
-...
-...
+//...code
 
 f
 .fetch(/*url to fetch..*/)
 .then(val => .......);
 
-...
-...
+//...code
 ```
 
 ### promisify()
@@ -355,14 +340,12 @@ OnCancel static method. It accepts a callback or a object with cb property and a
 ```javascript
 const controller = new AbortController();
 
-...
-...
+//...code
 Futurable.onCancel({
 	cb: ()=>console.log("Cancelled"),
 	signal: controller.signal
 });
-...
-...
+//...code
 ```
 
 ### Futurable.sleep(timer: number | {timer: number, signal?: AbortSignal})
@@ -370,16 +353,14 @@ Sleep static method. It accepts a timer or a object with timer property and an o
 
 *Example*
 ```javascript
-...
-...
+//...code
 
 Futurable.sleep({
 	timer: 3000,
 	signal: signal
 });
 
-...
-...
+//...code
 ```
 
 ### Futurable.delay({cb: callback, timer: number, signal?: AbortSignal})
@@ -388,16 +369,14 @@ Delay static method. It accepts a object with timer and cb properties and an opt
 *Example*
 ```javascript
 const controller = new AbortController();
-...
-...
+//...code
 
 Futurable.delay({
 	cb: ()=>console.log("Cancelled"),
 	timer: 3000
 });
 
-...
-...
+//...code
 ```
 
 ### Futurable.fetch(url: string, opts: object | RequestInit)
@@ -405,13 +384,11 @@ Fetch static method.
 
 *Example*
 ```javascript
-...
-...
+//...code
 
 Futurable.fetch(/*url string..*/, {method: "POST"});
 
-...
-...
+//...code
 ```
 
 ### Futurable.all(iterable: FuturableIterable[], signal?: AbortSignal)
@@ -421,8 +398,7 @@ Extension of the static method all with cancellation support.
 ```javascript
 const controller = new AbortController();
 
-...
-...
+//...code
 
 Futurable.all([
 	1,
@@ -430,8 +406,7 @@ Futurable.all([
 	new Futurable/*...*/
 ], controller.signal);
 
-...
-...
+//...code
 ```
 
 ### Futurable.allSettled(iterable: FuturableIterable[], signal?: AbortSignal)
@@ -441,8 +416,7 @@ Extension of the static method allSettled with cancellation support.
 ```javascript
 const controller = new AbortController();
 
-...
-...
+//...code
 
 Futurable.allSettled([
 	1,
@@ -450,8 +424,7 @@ Futurable.allSettled([
 	new Futurable/*...*/
 ], controller.signal);
 
-...
-...
+//...code
 ```
 
 ### Futurable.any(iterable: FuturableIterable[], signal?: AbortSignal)
@@ -460,8 +433,7 @@ Extension of the static method any with cancellation support.
 *Example*
 ```javascript
 const controller = new AbortController();
-...
-...
+//...code
 
 Futurable.any([
 	1,
@@ -469,8 +441,7 @@ Futurable.any([
 	new Futurable/*...*/
 ], controller.signal);
 
-...
-...
+//...code
 ```
 
 ### Futurable.race(iterable: FuturableIterable[], signal?: AbortSignal)
@@ -479,8 +450,7 @@ Extension of the static method race with cancellation support.
 *Example*
 ```javascript
 const controller = new AbortController();
-...
-...
+//...code
 
 Futurable.race([
 	1,
@@ -488,8 +458,7 @@ Futurable.race([
 	new Futurable/*...*/
 ], controller.signal);
 
-...
-...
+//...code
 ```
 
 
