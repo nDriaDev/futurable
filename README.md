@@ -211,13 +211,13 @@ const futurable = new Futurable((res, rej) => {
 
 //...code
 
-f
+futurable
 .onCancel(() => console.log("Futurable cancelled"))
 .then(val => .......);
 
 //...code
 
-f.cancel();
+futurable.cancel();
 ```
 ```bash
 Output: Futurable cancelled
@@ -244,7 +244,7 @@ const futurable = new Futurable((res, rej) => {
 
 //...code
 
-f
+futurable
 .sleep(3000)
 .then(val => .......);
 
@@ -272,7 +272,7 @@ const futurable = new Futurable((res, rej) => {
 
 //...code
 
-f
+futurable
 .delay((val)=> {
 	console.log("delayed val", val);
 	return val;
@@ -303,7 +303,7 @@ const futurable = new Futurable((res, rej) => {
 
 //...code
 
-f
+futurable
 .fetch(/*url to fetch..*/)
 .then(val => .......);
 
