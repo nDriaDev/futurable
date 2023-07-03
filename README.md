@@ -41,7 +41,7 @@ npm  install  futurable  # or yarn add futurable or pnpm add futurable
 
 
 #  Usage
-The library supports UMD ESM and CJS formats, so it can be used as follows:
+The library supports both ESM and CJS formats, so it can be used as follows:
 ```javascript
 import Futurable from 'futurable'; 		// ok
 
@@ -120,16 +120,16 @@ Futurable is instantiable like a classic Promise.
 ```javascript
 //Javascript Promise
 
-const  promise  =  new  Promise((resolve, reject) => {
-	const  data  =  /*..async operations or other..*/
+const promise = new Promise((resolve, reject) => {
+	const data = /*..async operations or other..*/
 	resolve(data);
 });
 
 //Futurable
-import  Futurable  from  'futurable';
+import Futurable from 'futurable';
 
-const  futurable  =  new  Futurable((resolve, reject) => {
-	const  data  =  /*..async operations or other..*/
+const futurable = new Futurable((resolve, reject) => {
+	const data = /*..async operations or other..*/
 	resolve(data);
 });
 ```
@@ -138,10 +138,10 @@ But it provides two more statements:
 1. Its constructor can receive a second parameter *signal*, an *AbortSignal*, usable to cancel the promise from the outside.
 
 ```javascript
-const  controller  =  new  AbortController();
+const controller = new AbortController();
 
-const  futurable  =  new  Futurable((resolve, reject) => {
-	const  data  =  /*..async operations or other..*/
+const futurable = new Futurable((resolve, reject) => {
+	const data = /*..async operations or other..*/
 	resolve(data);
 }, controller.signal);
 ```
@@ -149,10 +149,10 @@ const  futurable  =  new  Futurable((resolve, reject) => {
 2. The executor function passed to the promise receives a third parameter, *utils*, optional.
 
 ```javascript
-const  controller  =  new  AbortController();
+const controller = new AbortController();
 
-const  futurable  =  new  Futurable((resolve, reject, utils) => {
-	const  data  =  /*..async operations or other..*/
+const futurable = new Futurable((resolve, reject, utils) => {
+	const data = /*..async operations or other..*/
 	resolve(data);
 });
 ```
@@ -165,7 +165,7 @@ Utils is an object with the following properties which mirror the methods descri
 In addition is has:
 - signal: internal futurable signal;
 
-###  cancel()
+### cancel()
 If invoked, it cancel the futurable if it is to be executed or if it is still executing.
 
 *Example*
@@ -187,14 +187,14 @@ futurable.then(value => {
 futurable.cancel();
 ```
 
-###  onCancel(cb: callback)
+### onCancel(cb: callback)
 If it is invoked, when the futurable is cancelled, it executes the callback passed as a parameter.
 
 *Example*
 ```javascript
-let futurable = new  Futurable((resolve, reject, utils) => {
+let futurable = new Futurable((resolve, reject, utils) => {
 	utils.onCancel(() => console.log("Futurable cancelled"));
-	const  data  =  /*..async operations or other..*/
+	const data = /*..async operations or other..*/
 	resolve(data);
 });
 ...
@@ -220,13 +220,13 @@ f.cancel();
 Output: Futurable cancelled
 ```
 
-###  sleep(timer: number)
+### sleep(timer: number)
 Waits for timer parameter (in milliseconds) before returning the value.
 
 *Example*
 ```javascript
-let futurable = new  Futurable((resolve, reject, utils) => {
-	const  data  =  /*..async operations or other..*/
+let futurable = new Futurable((resolve, reject, utils) => {
+	const data = /*..async operations or other..*/
 	utils.sleep(3000);
 	resolve(data);
 });
@@ -248,12 +248,12 @@ f
 ...
 ```
 
-###  delay(cb: callback, timer: number)
+### delay(cb: callback, timer: number)
 Waits for timer parameter (in milliseconds), then executes callback with the futurable value and returns the result obtained from the invocation.
 *Example*
 ```javascript
-let futurable = new  Futurable((resolve, reject, utils) => {
-	const  data  =  /*..async operations or other..*/
+let futurable = new Futurable((resolve, reject, utils) => {
+	const data = /*..async operations or other..*/
 	utils.delay(()=>console.log("delayed"), 3000);
 	resolve(data);
 });
@@ -278,12 +278,12 @@ f
 ...
 ```
 
-###  fetch(url: string, opts: object | RequestInit)
+### fetch(url: string, opts: object | RequestInit)
 Extension of the fetch API with cancellation support.
 
 *Example*
 ```javascript
-let futurable = new  Futurable((resolve, reject, utils) => {
+let futurable = new Futurable((resolve, reject, utils) => {
 	utils.fetch(/*url to fetch..*/)
 	.then(val => resolve(val))
 });
@@ -305,7 +305,7 @@ f
 ...
 ```
 
-###  promisify()
+### promisify()
 Transforms the futurable into a normal promise in order to be able to use the async/await syntax but keeping possibility to cancel futurable until its invocation.
 
 *Example*
@@ -317,7 +317,7 @@ async function op() {
 }
 ```
 
-###  futurizable //Work in progress
+### futurizable //Work in progress
 Takes a promise and transforms it into a futurizable.
 
 *Example*
@@ -327,7 +327,7 @@ Takes a promise and transforms it into a futurizable.
 
 ```
 
-###  Futurable.onCancel(cb: callback | {cb: callback, signal?: AbortSignal})
+### Futurable.onCancel(cb: callback | {cb: callback, signal?: AbortSignal})
 OnCancel static method. It accepts a callback or a object with cb property and an optional signal.
 
 *Example*
@@ -344,7 +344,7 @@ Futurable.onCancel({
 ...
 ```
 
-###  Futurable.sleep(timer: number | {timer: number, signal?: AbortSignal})
+### Futurable.sleep(timer: number | {timer: number, signal?: AbortSignal})
 Sleep static method. It accepts a timer or a object with timer property and an optional signal.
 
 *Example*
@@ -359,7 +359,7 @@ Futurable.sleep({
 ...
 ```
 
-###  Futurable.delay({cb: callback, timer: number, signal?: AbortSignal})
+### Futurable.delay({cb: callback, timer: number, signal?: AbortSignal})
 Delay static method. It accepts a object with timer and cb properties and an optional signal property.
 
 *Example*
@@ -376,7 +376,7 @@ Futurable.delay({
 ...
 ```
 
-###  Futurable.fetch(url: string, opts: object | RequestInit)
+### Futurable.fetch(url: string, opts: object | RequestInit)
 Fetch static method.
 
 *Example*
@@ -388,7 +388,7 @@ Futurable.fetch(/*url string..*/, {method: "POST});
 ...
 ```
 
-###  Futurable.all(iterable: FuturableIterable[], signal?: AbortSignal)
+### Futurable.all(iterable: FuturableIterable[], signal?: AbortSignal)
 Extension of the static method all with cancellation support.
 
 *Example*
@@ -406,7 +406,7 @@ Futurable.all([
 ...
 ```
 
-###  Futurable.allSettled(iterable: FuturableIterable[], signal?: AbortSignal)
+### Futurable.allSettled(iterable: FuturableIterable[], signal?: AbortSignal)
 Extension of the static method allSettled with cancellation support.
 
 *Example*
@@ -424,7 +424,7 @@ Futurable.allSettled([
 ...
 ```
 
-###  Futurable.any(iterable: FuturableIterable[], signal?: AbortSignal)
+### Futurable.any(iterable: FuturableIterable[], signal?: AbortSignal)
 Extension of the static method any with cancellation support.
 
 *Example*
@@ -442,7 +442,7 @@ Futurable.any([
 ...
 ```
 
-###  Futurable.race(iterable: FuturableIterable[], signal?: AbortSignal)
+### Futurable.race(iterable: FuturableIterable[], signal?: AbortSignal)
 Extension of the static method race with cancellation support.
 
 *Example*
@@ -461,7 +461,7 @@ Futurable.race([
 ```
 
 
-##  License
+## License
 
 
 
