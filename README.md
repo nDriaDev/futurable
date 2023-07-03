@@ -181,6 +181,7 @@ Utils is an object with the following properties which mirror the methods descri
 - sleep;
 - fetch;
 - futurizable.
+
 In addition is has:
 - signal: internal futurable signal;
 
