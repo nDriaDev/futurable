@@ -129,7 +129,6 @@ They are the following:
 - [sleep](#sleep)
 - [delay](#delay)
 - [fetch](#fetch)
-- [promisify](#promisify)
 - [futurizable](#futurizable)
 - [Futurable.onCancel](#Futurable.onCancel)
 - [Futurable.sleep](#Futurable.sleep)
