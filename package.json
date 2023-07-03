@@ -2,7 +2,7 @@
 	"name": "@ndriadev/futurable",
 	"description": "Extension Javascript's Promise API with more functionalities",
 	"private": false,
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"type": "module",
 	"engines": {
 		"node": ">=16.13.2"
