@@ -176,12 +176,15 @@ function asynchronousOperation() {
 		resolve(true);
 	});
 );
+
 ....
 ....
+
 const futurable = asynchronousOperation();
-futurable.then(value => {
+	futurable.then(value => {
 	//DO anything
 });
+
 ....
 ....
 futurable.cancel();
@@ -197,8 +200,10 @@ const futurable = new Futurable((resolve, reject, utils) => {
 	const data = /*..async operations or other..*/
 	resolve(data);
 });
+
 ...
 ...
+
 futurable.cancel();
 
 //OR
@@ -207,13 +212,17 @@ const futurable = new Futurable((res, rej) => {
 	// asynchornous code..
 	resolve(true);
 });
+
 ...
 ...
+
 f
 .onCancel(() => console.log("Futurable cancelled"))
 .then(val => .......);
+
 ...
 ...
+
 f.cancel();
 ```
 ```bash
@@ -239,11 +248,14 @@ const futurable = new Futurable((res, rej) => {
 	// asynchornous code..
 	resolve(true);
 });
+
 ...
 ...
+
 f
 .sleep(3000)
 .then(val => .......);
+
 ...
 ...
 ```
@@ -257,6 +269,7 @@ const futurable = new Futurable((resolve, reject, utils) => {
 	utils.delay(()=>console.log("delayed"), 3000);
 	resolve(data);
 });
+
 ...
 ...
 
@@ -266,14 +279,17 @@ const futurable = new Futurable((res, rej) => {
 	// asynchornous code..
 	resolve(true);
 });
+
 ...
 ...
+
 f
 .delay((val)=> {
 	console.log("delayed val", val);
 	return val;
 },3000)
 .then(val => .......);
+
 ...
 ...
 ```
@@ -287,6 +303,7 @@ const futurable = new Futurable((resolve, reject, utils) => {
 	utils.fetch(/*url to fetch..*/)
 	.then(val => resolve(val))
 });
+
 ...
 ...
 
@@ -296,11 +313,14 @@ const futurable = new Futurable((res, rej) => {
 	// asynchornous code..
 	resolve(true);
 });
+
 ...
 ...
+
 f
 .fetch(/*url to fetch..*/)
 .then(val => .......);
+
 ...
 ...
 ```
@@ -313,6 +333,7 @@ Transforms the futurable into a normal promise in order to be able to use the as
 async function op() {
 	...
 	...
+
 	await Futurable.sleep(3000).promisify();
 }
 ```
@@ -351,10 +372,12 @@ Sleep static method. It accepts a timer or a object with timer property and an o
 ```javascript
 ...
 ...
+
 Futurable.sleep({
 	timer: 3000,
 	signal: signal
 });
+
 ...
 ...
 ```
@@ -365,13 +388,14 @@ Delay static method. It accepts a object with timer and cb properties and an opt
 *Example*
 ```javascript
 const controller = new AbortController();
+...
+...
 
-...
-...
 Futurable.delay({
 	cb: ()=>console.log("Cancelled"),
 	timer: 3000
 });
+
 ...
 ...
 ```
@@ -383,7 +407,9 @@ Fetch static method.
 ```javascript
 ...
 ...
-Futurable.fetch(/*url string..*/, {method: "POST});
+
+Futurable.fetch(/*url string..*/, {method: "POST"});
+
 ...
 ...
 ```
@@ -397,11 +423,13 @@ const controller = new AbortController();
 
 ...
 ...
+
 Futurable.all([
 	1,
 	Futurable.resolve(true),
 	new Futurable/*...*/
 ], controller.signal);
+
 ...
 ...
 ```
@@ -415,11 +443,13 @@ const controller = new AbortController();
 
 ...
 ...
+
 Futurable.allSettled([
 	1,
 	Futurable.resolve(true),
 	new Futurable/*...*/
 ], controller.signal);
+
 ...
 ...
 ```
@@ -430,14 +460,15 @@ Extension of the static method any with cancellation support.
 *Example*
 ```javascript
 const controller = new AbortController();
+...
+...
 
-...
-...
 Futurable.any([
 	1,
 	Futurable.resolve(true),
 	new Futurable/*...*/
 ], controller.signal);
+
 ...
 ...
 ```
@@ -448,14 +479,15 @@ Extension of the static method race with cancellation support.
 *Example*
 ```javascript
 const controller = new AbortController();
+...
+...
 
-...
-...
 Futurable.race([
 	1,
 	Futurable.resolve(true),
 	new Futurable/*...*/
 ], controller.signal);
+
 ...
 ...
 ```
