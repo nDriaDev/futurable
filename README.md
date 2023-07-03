@@ -57,7 +57,7 @@ export default function Component() {
 	....
 
 	useEffect(() => {
-        let f;
+        const f;
         function callApi() {
             f = Futurable
             .fetch("https://jsonplaceholder.typicode.com/todos/2")
@@ -74,7 +74,7 @@ export default function Component() {
 	//OR
 
 	useEffect(() => {
-        let controller = new AbortController();
+        const controller = new AbortController();
         Futurable
         .fetch(
             "https://jsonplaceholder.typicode.com/todos/2",
@@ -178,7 +178,7 @@ function asynchronousOperation() {
 );
 ....
 ....
-let futurable = asynchronousOperation();
+const futurable = asynchronousOperation();
 futurable.then(value => {
 	//DO anything
 });
@@ -192,7 +192,7 @@ If it is invoked, when the futurable is cancelled, it executes the callback pass
 
 *Example*
 ```javascript
-let futurable = new Futurable((resolve, reject, utils) => {
+const futurable = new Futurable((resolve, reject, utils) => {
 	utils.onCancel(() => console.log("Futurable cancelled"));
 	const data = /*..async operations or other..*/
 	resolve(data);
@@ -203,7 +203,7 @@ futurable.cancel();
 
 //OR
 
-let futurable = new Futurable((res, rej) => {
+const futurable = new Futurable((res, rej) => {
 	// asynchornous code..
 	resolve(true);
 });
@@ -225,7 +225,7 @@ Waits for timer parameter (in milliseconds) before returning the value.
 
 *Example*
 ```javascript
-let futurable = new Futurable((resolve, reject, utils) => {
+const futurable = new Futurable((resolve, reject, utils) => {
 	const data = /*..async operations or other..*/
 	utils.sleep(3000);
 	resolve(data);
@@ -235,7 +235,7 @@ let futurable = new Futurable((resolve, reject, utils) => {
 
 //OR
 
-let futurable = new Futurable((res, rej) => {
+const futurable = new Futurable((res, rej) => {
 	// asynchornous code..
 	resolve(true);
 });
@@ -252,7 +252,7 @@ f
 Waits for timer parameter (in milliseconds), then executes callback with the futurable value and returns the result obtained from the invocation.
 *Example*
 ```javascript
-let futurable = new Futurable((resolve, reject, utils) => {
+const futurable = new Futurable((resolve, reject, utils) => {
 	const data = /*..async operations or other..*/
 	utils.delay(()=>console.log("delayed"), 3000);
 	resolve(data);
@@ -262,7 +262,7 @@ let futurable = new Futurable((resolve, reject, utils) => {
 
 //OR
 
-let futurable = new Futurable((res, rej) => {
+const futurable = new Futurable((res, rej) => {
 	// asynchornous code..
 	resolve(true);
 });
@@ -283,7 +283,7 @@ Extension of the fetch API with cancellation support.
 
 *Example*
 ```javascript
-let futurable = new Futurable((resolve, reject, utils) => {
+const futurable = new Futurable((resolve, reject, utils) => {
 	utils.fetch(/*url to fetch..*/)
 	.then(val => resolve(val))
 });
@@ -292,7 +292,7 @@ let futurable = new Futurable((resolve, reject, utils) => {
 
 //OR
 
-let futurable = new Futurable((res, rej) => {
+const futurable = new Futurable((res, rej) => {
 	// asynchornous code..
 	resolve(true);
 });
