@@ -91,7 +91,7 @@ describe('Futurable', () => {
 		});
 		expect(signal).toBeInstanceOf(AbortSignal);
 	});
-	test('internal abort and sleep', async () => {
+	test('internal onCancel and sleep', async () => {
 		expect.assertions(1);
 		let data:number, f:Futurable<void>;
 		await new Promise<void>(resolve => {
@@ -99,9 +99,9 @@ describe('Futurable', () => {
 				f.cancel();
 			}, 1000);
 			f = new Futurable<boolean>((res, rej, utils) => {
-				utils.onAbort(() => {
+				utils.onCancel(() => {
 				});
-				utils.onAbort(() => {
+				utils.onCancel(() => {
 					expect(data).toBeUndefined();
 					resolve();
 				});
@@ -423,7 +423,7 @@ describe('Futurable', () => {
 				res(true);
 			})
 				.then(val => data = 1)
-				.onAbort(() => {
+				.onCancel(() => {
 					resolve();
 				})
 				.cancel();
@@ -438,7 +438,7 @@ describe('Futurable', () => {
 				rej(true);
 			})
 				.catch(val => data = 1)
-				.onAbort(() => {
+				.onCancel(() => {
 					resolve();
 				})
 				.cancel();
@@ -475,10 +475,10 @@ describe('Futurable', () => {
 		data = await Futurable.reject(3).catch(val => val).promisify();
 		expect(data).toBe(3);
 	});
-	test('static onAbort', () => {
+	test('static onCancel', () => {
 		let data = 1;
 		const controller = new AbortController();
-		Futurable.onAbort(() => {
+		Futurable.onCancel(() => {
 			expect(data).toBe(1);
 		}, controller.signal);
 		Futurable.resolve(3, controller.signal).then(val => data = val).cancel();

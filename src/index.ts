@@ -15,7 +15,7 @@ export interface FuturableReject {
 export interface FuturableUtils<T> {
 	signal: AbortSignal;
 	cancel: () => void;
-	onAbort: (cb: () => void) => void;
+	onCancel: (cb: () => void) => void;
 	delay: (cb: () => any, timer: number) => Futurable<T>;
 	sleep: (timer: number) => Futurable<T>;
 	fetch: (url: string, opts?: RequestInit) => Futurable<T>;
@@ -58,14 +58,14 @@ export class Futurable<T> extends Promise<T> {
 
 		let abort: () => void;
 
-		const onAbort = (cb: () => void): void => {
+		const onCancel = (cb: () => void): void => {
 			abort = cb;
 		};
 
 		const utils = {
 			signal: sign,
 			cancel: (): void => this.#controller?.abort(),
-			onAbort,
+			onCancel,
 			delay: (cb: () => any, timer: number): Futurable<T> => {
 				return new Futurable(res => {
 					idsTimeout.push(setTimeout(() => {
@@ -250,10 +250,10 @@ export class Futurable<T> extends Promise<T> {
 		return p;
 	}
 
-	onAbort<TResult1 = T, TResult2 = never>(cb: () => void): Futurable<TResult1 | TResult2> {
+	onCancel<TResult1 = T, TResult2 = never>(cb: () => void): Futurable<TResult1 | TResult2> {
 		let resolve: FuturableResolve<TResult1 | TResult2>, reject: FuturableReject;
 		const f = new Futurable((res, rej, utils) => {
-			utils.onAbort(cb);
+			utils.onCancel(cb);
 			resolve = res;
 			reject = rej;
 		}, this.#signal);
@@ -288,9 +288,9 @@ export class Futurable<T> extends Promise<T> {
 		return new Futurable((res, rej) => rej(reason), signal);
 	}
 
-	static onAbort(cb: () => void, signal?: AbortSignal): Futurable<any> {
+	static onCancel(cb: () => void, signal?: AbortSignal): Futurable<any> {
 		return new Futurable((res, rej, utils) => {
-			utils.onAbort(() => res(cb()));
+			utils.onCancel(() => res(cb()));
 		}, signal);
 	}
 
@@ -320,7 +320,7 @@ export class Futurable<T> extends Promise<T> {
 		const f = new Futurable<any>((res, rej, utils) => {
 			resolve = res;
 			reject = rej;
-			utils.onAbort(() => {
+			utils.onCancel(() => {
 				for (const promise of array) {
 					promise.signal !== signal && promise.cancel();
 				}
