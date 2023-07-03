@@ -8,17 +8,17 @@ jest.spyOn(global, 'fetch');
 
 describe('Futurable', () => {
 	test("toString", () => {
-		expect(new Futurable((res) => { }).toString()).toBe(
+		expect(new Futurable(() => { }).toString()).toBe(
 			"[object Futurable]"
 		);
 	});
 	test("get internal signal", () => {
-		expect(new Futurable((res) => { }).signal).toBeInstanceOf(AbortSignal);
+		expect(new Futurable(() => { }).signal).toBeInstanceOf(AbortSignal);
 	});
 	test("get internal signal passed from outside", () => {
 		const controller = new AbortController();
 		const signal = controller.signal;
-		expect(new Futurable((res) => { }, signal).signal).toEqual(signal);
+		expect(new Futurable(() => { }, signal).signal).toEqual(signal);
 	});
 	test('then', () => {
 		expect.assertions(1);
@@ -34,7 +34,7 @@ describe('Futurable', () => {
 	});
 	test("then throw error", () => {
 		expect.assertions(1);
-		return new Futurable((res) => res(3)).then((val) => {
+		return new Futurable((res) => res(3)).then(() => {
 			throw Error("thenError");
 		}).catch(err => {
 			expect(err.message).toBe("thenError");
@@ -54,7 +54,7 @@ describe('Futurable', () => {
 	});
 	test("catch throw error", () => {
 		expect.assertions(1);
-		return new Futurable((res, rej) => rej(3)).catch(val => {
+		return new Futurable((res, rej) => rej(3)).catch(() => {
 			throw Error("catchError");
 		}).catch((err) => {
 			expect(err.message).toBe("catchError");
@@ -63,7 +63,7 @@ describe('Futurable', () => {
 	test("finally after resolve", () => {
 		expect.assertions(1);
 		let data:number|undefined;
-		return new Futurable((res, rej) => res(3))
+		return new Futurable(res => res(3))
 			.finally(() => {
 				expect(data).toBeUndefined();
 			});
@@ -85,7 +85,7 @@ describe('Futurable', () => {
 				resolve();
 			});
 			controller.abort();
-			new Futurable((res, rej, utils) => {
+			new Futurable(res => {
 				res(true);
 			}, signal);
 		});
@@ -141,7 +141,7 @@ describe('Futurable', () => {
 			new Futurable((res, rej, utils) => {
 				utils.fetch('fake fake')
 					.then(resp => resp.json())
-					.then(val => {
+					.then(() => {
 						data = 1;
 					})
 					.then(() => {
@@ -178,7 +178,7 @@ describe('Futurable', () => {
 				utils
 					.fetch("fake fake")
 					.then((resp) => resp.json())
-					.then((val) => {
+					.then(() => {
 						data = 1;
 					})
 					.then(() => {
@@ -219,7 +219,7 @@ describe('Futurable', () => {
 				utils
 					.fetch("fake fake")
 					.then((resp) => resp.json())
-					.then((val) => {
+					.then(() => {
 						data = 1;
 					})
 					.then(() => {
@@ -298,7 +298,7 @@ describe('Futurable', () => {
 		})
 		expect(data).toBe(2);
 	});
-	test("fetch", async () => {
+	test("fetch with string and object as parameters", async () => {
 		(fetch as any).mockReturnValue(Promise.resolve({ json: () => Promise.resolve({}) }));
 		expect.assertions(1);
 		let data:number|undefined;
@@ -306,9 +306,28 @@ describe('Futurable', () => {
 			new Futurable((res) => {
 				res(true);
 			})
-				.fetch('fake fake')
+				.fetch('fake fake', {method: "GET"})
 				.then(resp => resp.json())
-				.then(val => {
+				.then(() => {
+					data = 1;
+				})
+				.then(() => {
+					resolve();
+				});
+		});
+		expect(data).toBe(1);
+	});
+	test("fetch with functions as parameters", async () => {
+		(fetch as any).mockReturnValue(Promise.resolve({ json: () => Promise.resolve({}) }));
+		expect.assertions(1);
+		let data: number | undefined;
+		await new Promise<void>((resolve) => {
+			new Futurable<{url:string, method:string}>((res) => {
+				res({url:"fake", method: "GET"});
+			})
+				.fetch((val) => val!.url + ' fake', (val) => ({method: val!.method}))
+				.then(resp => resp.json())
+				.then(() => {
 					data = 1;
 				})
 				.then(() => {
@@ -327,13 +346,13 @@ describe('Futurable', () => {
 			})
 				.fetch('fake fake')
 				.then(resp => resp.json())
-				.then(val => {
+				.then(() => {
 					data = 1;
 				})
 				.then(() => {
 					resolve();
 				})
-				.catch(reason => {
+				.catch(() => {
 					resolve();
 				})
 				;
@@ -366,7 +385,7 @@ describe('Futurable', () => {
 				res(true);
 			}).fetch("fake fake")
 				.then((resp) => resp.json())
-				.then((val) => {
+				.then(() => {
 					data = 1;
 				})
 				.then(() => {
@@ -405,7 +424,7 @@ describe('Futurable', () => {
 				res(true);
 			}).fetch("fake fake")
 				.then((resp) => resp.json())
-				.then((val) => {
+				.then(() => {
 					data = 1;
 				})
 				.then(() => {
@@ -422,7 +441,7 @@ describe('Futurable', () => {
 			new Futurable((res) => {
 				res(true);
 			})
-				.then(val => data = 1)
+				.then(() => data = 1)
 				.onCancel(() => {
 					resolve();
 				})
@@ -437,7 +456,7 @@ describe('Futurable', () => {
 			new Futurable((res, rej) => {
 				rej(true);
 			})
-				.catch(val => data = 1)
+				.catch(() => data = 1)
 				.onCancel(() => {
 					resolve();
 				})
@@ -445,42 +464,78 @@ describe('Futurable', () => {
 		});
 		expect(data).toBeUndefined();
 	});
-	test('promisify', async () => {
-		let data = 1;
-		await Futurable.delay(() => data = 2, 3000).promisify();
-		jest.advanceTimersByTime(3000);
-		expect(data).toBe(2);
-	});
-	test('promisify with signal aborted', async () => {
-		let resolver:(value: void | PromiseLike<void>)=>void, data = 1;
-		const controller = new AbortController();
-		setTimeout(() => {
-			controller.abort();
-			resolver();
-		}, 1000)
-		await new Promise<void>(async res => {
-			resolver = res;
-			jest.advanceTimersByTime(1000);
-			await Futurable.delay(() => data = 2, { timer: 3000, signal: controller.signal }).promisify();
+	// test('promisify', async () => {
+	// 	let data = 1;
+	// 	await Futurable.delay({
+	// 		cb: () => data = 2,
+	// 		timer: 3000
+	// 	}).promisify();
+	// 	jest.advanceTimersByTime(3000);
+	// 	expect(data).toBe(2);
+	// });
+	// test('promisify with signal aborted', async () => {
+	// 	let resolver:(value: void | PromiseLike<void>)=>void, data = 1;
+	// 	const controller = new AbortController();
+	// 	setTimeout(() => {
+	// 		controller.abort();
+	// 		resolver();
+	// 	}, 1000)
+	// 	await new Promise<void>(async res => {
+	// 		resolver = res;
+	// 		jest.advanceTimersByTime(1000);
+	// 		await Futurable.delay(() => data = 2, { timer: 3000, signal: controller.signal }).promisify();
+	// 	})
+	// 	expect(data).toBe(1);
+	// });
+	test('futurizable utils', async () => {
+		const data = 1;
+		const newData = await new Futurable((resolve, reject, utils) => {
+			utils.futurizable(new Promise(res => res(1)))
+			.then(resolve)
 		})
-		expect(data).toBe(1);
+			.then(val => val + data);
+		jest.advanceTimersByTime(3000);
+		expect(newData).toBe(2);
+	});
+	test('futurizable futurable chaining with function as parameter', async () => {
+		const newData = await Futurable.resolve(1).futurizable(val => new Promise(res => res(val+1)))
+			.sleep(3000)
+		jest.advanceTimersByTime(3000);
+		expect(newData).toBe(2);
+	});
+	test('futurizable futurable chaining with promise as parameter', async () => {
+		const newData = await Futurable.resolve(2).futurizable(new Promise(res => res(1)))
+			.sleep(3000)
+		jest.advanceTimersByTime(3000);
+		expect(newData).toBe(1);
+	});
+	test('static futurizable', async () => {
+		const data = 1;
+		const newData = await Futurable.futurizable({ promise: new Promise(res => res(1)) })
+			.sleep(3000)
+			.then(val => val + data);
+		jest.advanceTimersByTime(3000);
+		expect(newData).toBe(2);
 	});
 	test('static resolve', async () => {
 		let data = 1;
-		data = await Futurable.resolve(3).promisify();
+		data = await Futurable.resolve(3);
 		expect(data).toBe(3);
 	});
 	test('static reject', async () => {
 		let data = 1;
-		data = await Futurable.reject(3).catch(val => val).promisify();
+		data = await Futurable.reject(3).catch(val => val);
 		expect(data).toBe(3);
 	});
 	test('static onCancel', () => {
 		let data = 1;
 		const controller = new AbortController();
-		Futurable.onCancel(() => {
-			expect(data).toBe(1);
-		}, controller.signal);
+		Futurable.onCancel({
+			cb: () => {
+				expect(data).toBe(1);
+			},
+			signal: controller.signal
+		});
 		Futurable.resolve(3, controller.signal).then(val => data = val).cancel();
 	});
 	test('static sleep', async () => {
@@ -489,7 +544,7 @@ describe('Futurable', () => {
 		setTimeout(() => {
 			expect(data).toBe(1);
 		}, 1000);
-		await Futurable.sleep(3000).promisify();
+		await Futurable.sleep({timer: 3000});
 		jest.advanceTimersByTime(1000);
 		data = 2;
 		jest.advanceTimersByTime(3000);
@@ -498,7 +553,7 @@ describe('Futurable', () => {
 	test("static fetch", async () => {
 		(fetch as any).mockReturnValue(Promise.resolve({ json: () => Promise.resolve({ id: 0 }) }));
 		expect.assertions(1);
-		const resp = await Futurable.fetch('fake fake').promisify();
+		const resp = await Futurable.fetch('fake fake');
 		const data = await resp.json();
 		expect(data.id).toBe(0);
 	});
@@ -522,7 +577,7 @@ describe('Futurable', () => {
 			}, 500)
 			f = Futurable.fetch("fake fake")
 				.then((resp) => resp.json())
-				.then((val) => {
+				.then(() => {
 					data = 1;
 				})
 				.then(() => {
@@ -552,7 +607,7 @@ describe('Futurable', () => {
 			}, 500)
 			f = Futurable.fetch("fake fake")
 				.then((resp) => resp.json())
-				.then((val) => {
+				.then(() => {
 					data = 1;
 				})
 				.then(() => {
@@ -567,7 +622,7 @@ describe('Futurable', () => {
 		const data = await Futurable.all([
 			Futurable.resolve(1),
 			Promise.resolve(1)
-		]).promisify();
+		]);
 		expect(data).toBeInstanceOf(Array);
 		expect(data).toContainEqual(1);
 	});
@@ -581,11 +636,17 @@ describe('Futurable', () => {
 		await new Promise<void>(async res => {
 			resolve = res;
 			f = Futurable.all([
-				Futurable.delay(() => 1, 2000),
-				Futurable.delay(() => 1, 3000)
+				Futurable.delay({
+					cb: () => 1,
+					timer: 2000
+				}),
+				Futurable.delay({
+					cb: () => 1,
+					timer: 3000
+				})
 			]);
 			jest.advanceTimersByTime(1000);
-			data = await f.promisify();
+			data = await f;
 			res();
 		})
 		expect(data).toBeUndefined();
@@ -598,7 +659,7 @@ describe('Futurable', () => {
 				Futurable.resolve(1),
 				1,
 				Futurable.reject(1)
-			]).promisify();
+			]);
 		} catch (e) {
 			data = e;
 		}
@@ -610,7 +671,7 @@ describe('Futurable', () => {
 			Futurable.resolve(1),
 			1,
 			Futurable.reject(1)
-		]).promisify();
+		]);
 		expect(data).toBeInstanceOf(Array);
 		expect(data[0].status).toBe("fulfilled");
 		expect(data[1].status).toBe("fulfilled");
@@ -619,19 +680,25 @@ describe('Futurable', () => {
 	test("race with one futurable delay one value and one futurable resolve", async () => {
 		expect.assertions(1);
 		const data = await Futurable.race([
-			Futurable.delay(() => 1, 3000),
+			Futurable.delay({
+				cb: () => 1,
+				timer: 3000
+			}),
 			1,
 			Futurable.resolve(2)
-		]).promisify();
+		]);
 		expect(data).toBe(1);
 	});
 	test("any with one futurable delay one value and one futurable reject", async () => {
 		expect.assertions(1);
 		const data = await Futurable.race([
-			Futurable.delay(() => 3, 3000),
+			Futurable.delay({
+				cb: () => 3,
+				timer: 3000
+			}),
 			1,
 			Futurable.reject(2)
-		]).promisify();
+		]);
 		expect(data).toBe(1);
 	});
 	test("any with all rejected", async () => {
@@ -642,7 +709,7 @@ describe('Futurable', () => {
 				Promise.reject(1),
 				Promise.reject(4),
 				Promise.reject(2)
-			]).promisify();
+			]);
 		} catch (aggregateErrors) {
 			data = (aggregateErrors as AggregateError).errors;
 		}

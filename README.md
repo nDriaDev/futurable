@@ -15,13 +15,30 @@ Power up for Javascript's Promise API with cancellation support and more.
 - [Introduction](#introduction)
 	- [Installation](#Installation)
 - [Usage](#Usage)
-	- [Methods](#Methods)
+	- [Use-case](#Use-case)
+		- [React](#React)
 - [API](#API)
+	- [constructor](#constructor)
+	- [cancel](#cancel)
+	- [onCancel](#onCancel)
+	- [sleep](#sleep)
+	- [delay](#delay)
+	- [fetch](#fetch)
+	- [promisify](#promisify)
+	- [futurizable](#futurizable)
+	- [Futurable.onCancel](#Futurable.onCancel)
+	- [Futurable.sleep](#Futurable.sleep)
+	- [Futurable.delay](#Futurable.delay)
+	- [Futurable.fetch](#Futurable.fetch)
+	- [Futurable.futurizable](#Futurable.futurizable)
+	- [Futurable.all](#Futurable.all)
+	- [Futurable.allSettled](Futurable.allSettled)
+	- [Futurable.race](#Futurable.race)
+	- [Futurable.any](#Futurable.any)
 - [License](#License)
 
 
 #  ToDo
-- A method *Futurizable* to take a promise and transform it into a futurable.
 - Think about the possibility of making a static method that returns an object with the futurable, resolve, reject, utils properties inside to be used as done for usePromiser.
 
 
@@ -48,7 +65,7 @@ import Futurable from 'futurable'; 		// ok
 const { Futurable } = require('futurable');	// ok
 ```
 
-## Usecase
+## Use-case
 ### React
 Thanks to the use of this library, there is a simple and effective way to be able to cancel an Api request executed in a useEffect which, due to the Strict Mode, is executed twice:
 ```jsx
@@ -109,11 +126,14 @@ They are the following:
 - [Futurable.onCancel](#Futurable.onCancel)
 - [Futurable.sleep](#Futurable.sleep)
 - [Futurable.delay](#Futurable.delay)
+- [Futurable.fetch](#Futurable.fetch)
+- [Futurable.futurizable](#Futurable.futurizable)
 - [Futurable.all](#Futurable.all)
 - [Futurable.allSettled](Futurable.allSettled)
 - [Futurable.race](#Futurable.race)
 - [Futurable.any](#Futurable.any)
-###  new Futurable(executor: FuturableExecutor, signal?: AbortSignal)
+
+### constructor(executor: FuturableExecutor, signal?: AbortSignal)
 Futurable is instantiable like a classic Promise.
 ```javascript
 //Javascript Promise
@@ -159,7 +179,8 @@ Utils is an object with the following properties which mirror the methods descri
 - onCancel:
 - delay;
 - sleep;
-- fetch.
+- fetch;
+- futurizable.
 In addition is has:
 - signal: internal futurable signal;
 
@@ -282,13 +303,13 @@ futurable
 //...code
 ```
 
-### fetch(url: string, opts: object | RequestInit)
-Extension of the fetch API with cancellation support.
+### fetch(url: string | (val => string), opts: object | RequestInit)
+Extension of the fetch API with cancellation support. Url parameter can be a string or a function with receive value from futurable chaining as paremeter
 
 *Example*
 ```javascript
 const futurable = new Futurable((resolve, reject, utils) => {
-	utils.fetch(/*url to fetch..*/)
+	utils.fetch(/*string url to fetch..*/)
 	.then(val => resolve(val))
 });
 
@@ -307,9 +328,15 @@ futurable
 .fetch(/*url to fetch..*/)
 .then(val => .......);
 
+//OR
+futurable
+.then(val => "https://...")
+.fetch((val /* val came from previous then*/) => ..., ..)
+
 //...code
 ```
 
+<!---
 ### promisify()
 Transforms the futurable into a normal promise in order to be able to use the async/await syntax but keeping possibility to cancel futurable until its invocation.
 
@@ -322,15 +349,41 @@ async function op() {
 	await Futurable.sleep(3000).promisify();
 }
 ```
-
-### futurizable //Work in progress
-Takes a promise and transforms it into a futurizable.
+--->
+### futurizable(promise: Promise | (val => Promise))
+Takes a promise and transforms it into a futurizable. Promise can be also a function that receives value from futurable chaining as parameter.
 
 *Example*
 ```javascript
+const futurable = new Futurable((resolve, reject, utils) => {
+	utils.futurizable(new Promise(res => {
+		//asynchronous code
+		res(data);
+	}))
+	.then(val => resolve(val))
+});
 
-//TODO
+//...code
 
+//OR
+
+const futurable = new Futurable((res, rej) => {
+	// asynchornous code..
+	resolve(true);
+});
+
+//...code
+
+futurable
+.futurizable(/*promise to futurizable*/)
+.then(val => .......);
+
+//OR
+futurable
+.then(val => 3)
+.futurizable((val /* val is 3 */) => new Promise(/*...*/) /*promise to futurizable*/, ..)
+
+//...code
 ```
 
 ### Futurable.onCancel(cb: callback | {cb: callback, signal?: AbortSignal})
@@ -387,6 +440,19 @@ Fetch static method.
 //...code
 
 Futurable.fetch(/*url string..*/, {method: "POST"});
+
+//...code
+```
+
+### Futurable.futurizable({promise: Promise, signal: AbortSignal})
+Futurizable static method.
+
+*Example*
+```javascript
+const controller = new AbortController();
+//...code
+
+Futurable.futurizable({promise: /*promise to futurizable*/, signal: controller.signal});
 
 //...code
 ```

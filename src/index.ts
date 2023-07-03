@@ -19,6 +19,7 @@ export interface FuturableUtils<T> {
 	delay: (cb: () => any, timer: number) => Futurable<T>;
 	sleep: (timer: number) => Futurable<T>;
 	fetch: (url: string, opts?: RequestInit) => Futurable<T>;
+	futurizable: (promise: Promise<T>) => Futurable<T>;
 }
 
 export type FuturableExecutor<T> = (
@@ -87,6 +88,13 @@ export class Futurable<T> extends Promise<T> {
 								rej(err);
 							}
 						});
+				}, sign);
+			},
+			futurizable: (promise: Promise<T>): Futurable<T> => {
+				return new Futurable((res, rej) => {
+					promise
+						.then(res)
+						.catch(rej);
 				}, sign);
 			}
 		};
@@ -266,18 +274,34 @@ export class Futurable<T> extends Promise<T> {
 		return f;
 	}
 
-	promisify<TResult1 = T, TResult2 = never>(): Promise<TResult1 | TResult2> {
-		return new Promise((res, rej) => {
-			if (this.#signal.aborted) {
-				this.#clearTimeout();
-				return;
-			} else {
-				this.then(
-					val => res(val),
-					reason => rej(reason)
-				);
-			}
+	// promisify<TResult1 = T, TResult2 = never>(): Promise<TResult1 | TResult2> {
+	// 	return new Promise((res, rej) => {
+	// 		if (this.#signal.aborted) {
+	// 			this.#clearTimeout();
+	// 			return;
+	// 		} else {
+	// 			this.then(
+	// 				val => res(val),
+	// 				reason => rej(reason)
+	// 			);
+	// 		}
+	// 	});
+	// }
+
+	futurizable<TResult1 = T, TResult2 = never>(promise: Promise<TResult1> | ((val?: TResult1) => Promise<TResult1>)): Futurable<TResult1 | TResult2> {
+		let resolve: FuturableResolve<TResult1 | TResult2>, reject: FuturableReject;
+		const f = new Futurable((res, rej) => {
+			resolve = res;
+			reject = rej;
+		}, this.#signal);
+		f.#controller = this.#controller;
+		this.then(val => {
+			const p = typeof promise === "function" ? promise(val) : promise;
+			p
+				.then(resolve)
+				.catch(reject);
 		});
+		return f;
 	}
 
 	static resolve(value?: any, signal?: AbortSignal): Futurable<any> {
@@ -288,23 +312,22 @@ export class Futurable<T> extends Promise<T> {
 		return new Futurable((res, rej) => rej(reason), signal);
 	}
 
-	static onCancel(cb: () => void, signal?: AbortSignal): Futurable<any> {
+	static onCancel({ cb, signal }: {cb: () => void, signal?: AbortSignal}): Futurable<any> {
 		return new Futurable((res, rej, utils) => {
 			utils.onCancel(() => res(cb()));
 		}, signal);
 	}
 
-	static delay(cb: () => any, timer: number | { timer: number, signal?: AbortSignal }): Futurable<any> {
-		let timeout: any = timer, signal;
-		if (typeof timer === "object") {
-			timeout = timer.timer;
-			signal = timer?.signal;
-		}
-		return Futurable.resolve(true, signal).delay(cb, timeout as number);
+	static delay({ cb, timer, signal }: { cb: () => any, timer: number, signal?: AbortSignal }): Futurable<any> {
+		return Futurable.resolve(true, signal).delay(cb, timer);
 	}
 
-	static sleep(timer: number | { timer: number, signal?: AbortSignal }): Futurable<any> {
-		return Futurable.delay(() => { }, timer);
+	static sleep({ timer, signal }: { timer: number, signal?: AbortSignal }): Futurable<any> {
+		return Futurable.delay({
+			cb: () => { },
+			timer,
+			signal
+		});
 	}
 
 	static fetch(url: string, opts?: RequestInit): Futurable<any> {
@@ -312,6 +335,14 @@ export class Futurable<T> extends Promise<T> {
 		opts?.signal && delete opts.signal;
 		return Futurable.resolve(true, signal)
 			.fetch(url, opts);
+	}
+
+	static futurizable<TResult1=any, TResult2=never>({ promise, signal }: { promise: Promise<TResult1>, signal?: AbortSignal }): Futurable<TResult1 | TResult2> {
+		return new Futurable((res, rej) => {
+			promise
+				.then(res)
+				.catch(rej);
+		}, signal);
 	}
 
 	static #handleIterables(iterables: FuturableIterable[], signal?: AbortSignal) {
