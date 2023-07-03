@@ -3,11 +3,18 @@
 <p align="center">
 Power up for Javascript's Promise API with cancellation support and more.
 </p>
-<p align="center">
-<a  href="https://www.npmjs.com/package/futurable">
-<img  src="https://img.shields.io/npm/v/futurable?color=orange&label="  alt="version" />
-</a>
-</p>
+<div align="center">
+
+[![npm version](https://img.shields.io/npm/v/%40ndriadev/futurable?color=orange&style=flat)](https://www.npmjs.org/package/%40ndriadev/futurable)
+[![npm bundle size](https://img.shields.io/bundlephobia/min/%40ndriadev/futurable)](https://bundlephobia.com/package/%40ndriadev/futurable)
+</div>
+<div align="center">
+
+![Statements](https://img.shields.io/badge/statements-100%25-brightgreen.svg?style=flat)
+![Branches](https://img.shields.io/badge/branches-96.46%25-brightgreen.svg?style=flat)
+![Functions](https://img.shields.io/badge/functions-100%25-brightgreen.svg?style=flat)
+![Lines](https://img.shields.io/badge/lines-100%25-brightgreen.svg?style=flat)
+</div>
 
 
 #  Summary

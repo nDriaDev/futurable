@@ -34,9 +34,8 @@
 		"test": "NODE_OPTIONS=--experimental-vm-modules jest",
 		"lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
 		"lint:fix": "eslint --fix 'src/**/*.{jsx,ts,tsx}'",
-		"format": "prettier --write src/**/*.{ts} --config ./.prettierrc",
 		"prepare": "pnpm run build",
-		"prepublishOnly": "pnpm test && pnpm run format && pnpm run lint"
+		"prepublishOnly": "pnpm test && pnpm run lint"
 	},
 	"devDependencies": {
 		"@babel/preset-typescript": "^7.21.5",
