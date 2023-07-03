@@ -4,6 +4,29 @@
 	"private": false,
 	"version": "1.0.0",
 	"type": "module",
+	"engines": {
+		"node": ">=16.13.2"
+	},
+	"files": [
+		"dist/",
+		"scripts"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/futurable.mjs",
+			"require": "./dist/futurable.cjs",
+			"default": "./dist/futurable.mjs",
+			"node": {
+				"types": "./dist/index.d.ts",
+				"require": "./dist/futurable.cjs",
+				"import": "./dist/futurable.mjs",
+				"default": "./dist/futurable.cjs"
+			}
+		}
+	},
+	"main": "./src/index.ts",
+	"types": "./src/index.d.ts",
 	"scripts": {
 		"preinstall": "node ./scripts/preinstall.js --foreground-script",
 		"postinstall": "echo 'postinstall executed'",
@@ -15,29 +38,6 @@
 		"prepare": "pnpm run build",
 		"prepublishOnly": "pnpm test && pnpm run format && pnpm run lint"
 	},
-	"engines": {
-		"node": ">=16.13.2"
-	},
-	"files": [
-		"dist/",
-		"scripts"
-	],
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/futurable.es.js",
-			"require": "./dist/futurable.cjs.js",
-			"default": "./dist/futurable.umd.js",
-			"node": {
-				"types": "./dist/index.d.ts",
-				"require": "./dist/futurable.cjs.js",
-				"import": "./dist/futurable.es.js"
-			}
-		}
-	},
-	"main": "./dist/futurable.umd.js",
-	"module": "./dist/futurable.es.js",
-	"types": "./dist/index.d.ts",
 	"devDependencies": {
 		"@babel/preset-typescript": "^7.21.5",
 		"@jest/globals": "^29.5.0",

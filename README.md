@@ -43,9 +43,9 @@ npm  install  futurable  # or yarn add futurable or pnpm add futurable
 #  Usage
 The library supports UMD ESM and CJS formats, so it can be used as follows:
 ```javascript
-import  Futurable  from  'futurable'; 		// ok
+import Futurable from 'futurable'; 		// ok
 
-const  Futurable  =  require('futurable');	// ok
+const { Futurable } = require('futurable');	// ok
 ```
 
 ## Usecase
