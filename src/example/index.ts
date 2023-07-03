@@ -1,8 +1,8 @@
-import { Futurable } from './../index';
+import { Futurable } from "./../index";
 
 let data;
 (async () => {
-	await new Promise<void>(res => {
+	await new Promise<void>((res) => {
 		Futurable.reject(3)
 			.delay(() => {
 				data = 4;
@@ -14,6 +14,6 @@ let data;
 				console.log("catch");
 				res();
 			});
-	})
+	});
 	console.log(data);
 })();
