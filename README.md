@@ -75,6 +75,8 @@ const { Futurable } = require('futurable');	// ok
 ## Use-case
 ### React
 Thanks to the use of this library, there is a simple and effective way to be able to cancel an Api request executed in a useEffect which, due to the Strict Mode, is executed twice:
+
+*Example*
 ```jsx
 export default function Component() {
 	//...code
@@ -83,8 +85,7 @@ export default function Component() {
         const f;
         function callApi() {
             f = Futurable
-            .fetch("https://jsonplaceholder.typicode.com/todos/2")
-            .onAbort(() => console.log("aborted"))
+            .fetch("...")
             .then(resp => resp.json())
             .then(setTodo);
         }
@@ -100,7 +101,7 @@ export default function Component() {
         const controller = new AbortController();
         Futurable
         .fetch(
-            "https://jsonplaceholder.typicode.com/todos/2",
+            "...",
             {
                 signal: controller.signal
             }
