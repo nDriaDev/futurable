@@ -1,9 +1,8 @@
 
-<h1 align="center">Futurable<br/>Javascript's Promise API with super powers!</h1>
-<p align="center">
-Power up for Javascript's Promise API with cancellation support and more.
-</p>
-<div style="display:flex; justify-content: center;">
+<h1 style="border-bottom: unset;" align="center">Futurable</h1>
+<h2 align="center">Javascript's Promise API with super powers!</h2>
+
+<div style="margin-top: 3rem; display:flex; justify-content: center;">
 
 [![npm version](https://img.shields.io/npm/v/%40ndriadev/futurable?color=orange&style=for-the-badge)](https://www.npmjs.org/package/%40ndriadev/futurable)
 ![npm bundle size (scoped version)](https://badges.hiptest.com:/bundlephobia/min/@ndriadev/futurable?color=yellow&label=SIZE&style=for-the-badge)
@@ -18,6 +17,9 @@ Power up for Javascript's Promise API with cancellation support and more.
 ![Lines](https://img.shields.io/badge/lines-100%25-brightgreen.svg?style=for-the-badge)
 </div>
 
+<h3 style="margin-bottom: 3rem" align="center">
+Power up for Javascript's Promise API with cancellation support and more.
+</h3>
 
 #  Summary
 - [ToDo](#TODO)
