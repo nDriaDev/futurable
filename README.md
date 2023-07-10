@@ -1,36 +1,14 @@
-(setq markdown-xhtml-header-content
-      "<style type='text/css'>
-h1 {
-	border-bottom: unset;
-}
-
-h3 {
-	margin-bottom: 3rem;
-}
-
-#badge-div-1 {
-	margin-top: 3rem;
-	display: flex;
-	justify-content: center;
-}
-
-#badge-div-2 {
-	display: flex;
-	justify-content: center;
-}
-</style>")
-
 <h1 align="center">Futurable</h1>
-<h2 align="center">Javascript's Promise API with super powers!</h2>
+<h3 align="center">Javascript's Promise API with super powers!</h3>
 
-<div id="badge-div-1">
+<div align="center">
 
 [![npm version](https://img.shields.io/npm/v/%40ndriadev/futurable?color=orange&style=for-the-badge)](https://www.npmjs.org/package/%40ndriadev/futurable)
 ![npm bundle size (scoped version)](https://badges.hiptest.com:/bundlephobia/min/@ndriadev/futurable?color=yellow&label=SIZE&style=for-the-badge)
 ![npm](https://badges.hiptest.com:/npm/dm/@ndriadev/futurable?color=red&style=for-the-badge)
 ![NPM](https://badges.hiptest.com:/npm/l/@ndriadev/futurable?color=blue&registry_uri=https%3A%2F%2Fregistry.npmjs.com&style=for-the-badge)
 </div>
-<div id="badge-div-2">
+<div align="center">
 
 ![Statements](https://img.shields.io/badge/statements-100%25-brightgreen.svg?style=for-the-badge)
 ![Branches](https://img.shields.io/badge/branches-96.46%25-brightgreen.svg?style=for-the-badge)
@@ -38,9 +16,6 @@ h3 {
 ![Lines](https://img.shields.io/badge/lines-100%25-brightgreen.svg?style=for-the-badge)
 </div>
 
-<h3 align="center">
-Power up for Javascript's Promise API with cancellation support and more.
-</h3>
 
 #  Summary
 - [ToDo](#TODO)
