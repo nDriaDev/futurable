@@ -1,4 +1,24 @@
-<link href="style.css" rel="stylesheet"></link>
+(setq markdown-xhtml-header-content
+      "<style type='text/css'>
+h1 {
+	border-bottom: unset;
+}
+
+h3 {
+	margin-bottom: 3rem;
+}
+
+#badge-div-1 {
+	margin-top: 3rem;
+	display: flex;
+	justify-content: center;
+}
+
+#badge-div-2 {
+	display: flex;
+	justify-content: center;
+}
+</style>")
 
 <h1 align="center">Futurable</h1>
 <h2 align="center">Javascript's Promise API with super powers!</h2>
