@@ -1,19 +1,21 @@
 
-<h1 align="center">Futurable</h1>
+<h1 align="center">Futurable<br/>Javascript's Promise API with super powers!</h1>
 <p align="center">
 Power up for Javascript's Promise API with cancellation support and more.
 </p>
-<div align="center">
+<div style="display:flex; justify-content: center;">
 
-[![npm version](https://img.shields.io/npm/v/%40ndriadev/futurable?color=orange&style=flat)](https://www.npmjs.org/package/%40ndriadev/futurable)
-[![npm bundle size](https://img.shields.io/bundlephobia/min/%40ndriadev/futurable)](https://bundlephobia.com/package/%40ndriadev/futurable)
+[![npm version](https://img.shields.io/npm/v/%40ndriadev/futurable?color=orange&style=for-the-badge)](https://www.npmjs.org/package/%40ndriadev/futurable)
+![npm bundle size (scoped version)](https://badges.hiptest.com:/bundlephobia/min/@ndriadev/futurable?color=yellow&label=SIZE&style=for-the-badge)
+![npm](https://badges.hiptest.com:/npm/dm/@ndriadev/futurable?color=red&style=for-the-badge)
+![NPM](https://badges.hiptest.com:/npm/l/@ndriadev/futurable?color=blue&registry_uri=https%3A%2F%2Fregistry.npmjs.com&style=for-the-badge)
 </div>
-<div align="center">
+<div style="display:flex; justify-content: center;">
 
-![Statements](https://img.shields.io/badge/statements-100%25-brightgreen.svg?style=flat)
-![Branches](https://img.shields.io/badge/branches-96.46%25-brightgreen.svg?style=flat)
-![Functions](https://img.shields.io/badge/functions-100%25-brightgreen.svg?style=flat)
-![Lines](https://img.shields.io/badge/lines-100%25-brightgreen.svg?style=flat)
+![Statements](https://img.shields.io/badge/statements-100%25-brightgreen.svg?style=for-the-badge)
+![Branches](https://img.shields.io/badge/branches-96.46%25-brightgreen.svg?style=for-the-badge)
+![Functions](https://img.shields.io/badge/functions-100%25-brightgreen.svg?style=for-the-badge)
+![Lines](https://img.shields.io/badge/lines-100%25-brightgreen.svg?style=for-the-badge)
 </div>
 
 
@@ -27,21 +29,20 @@ Power up for Javascript's Promise API with cancellation support and more.
 - [API](#API)
 	- [constructor](#constructor)
 	- [cancel](#cancel)
-	- [onCancel](#onCancel)
-	- [sleep](#sleep)
-	- [delay](#delay)
-	- [fetch](#fetch)
-	- [promisify](#promisify)
-	- [futurizable](#futurizable)
-	- [Futurable.onCancel](#Futurable.onCancel)
-	- [Futurable.sleep](#Futurable.sleep)
-	- [Futurable.delay](#Futurable.delay)
-	- [Futurable.fetch](#Futurable.fetch)
-	- [Futurable.futurizable](#Futurable.futurizable)
-	- [Futurable.all](#Futurable.all)
-	- [Futurable.allSettled](Futurable.allSettled)
-	- [Futurable.race](#Futurable.race)
-	- [Futurable.any](#Futurable.any)
+	- [onCancel](#oncancelcb-callback)
+	- [sleep](#sleeptimer-number)
+	- [delay](#delaycb-callback-timer-number)
+	- [fetch](#fetchurl-string--val--string-opts-object--requestinit)
+	- [futurizable](#futurizablepromise-promise--val--promise)
+	- [Futurable.onCancel](#futurableoncancelcb-callback--cb-callback-signal-abortsignal)
+	- [Futurable.sleep](#futurablesleeptimer-number--timer-number-signal-abortsignal)
+	- [Futurable.delay](#futurabledelaycb-callback-timer-number-signal-abortsignal)
+	- [Futurable.fetch](#futurablefetchurl-string-opts-object--requestinit)
+	- [Futurable.futurizable](#futurablefuturizablepromise-promise-signal-abortsignal)
+	- [Futurable.all](#futurablealliterable-futurableiterable-signal-abortsignal)
+	- [Futurable.allSettled](#futurableallsettlediterable-futurableiterable-signal-abortsignal)
+	- [Futurable.any](#futurableanyiterable-futurableiterable-signal-abortsignal)
+	- [Futurable.race](#futurableraceiterable-futurableiterable-signal-abortsignal)
 - [License](#License)
 
 
@@ -125,20 +126,20 @@ The methods implemented, excluding those that are by nature static can be used:
 
 They are the following:
 - [cancel](#cancel)
-- [onCancel](#onCancel)
-- [sleep](#sleep)
-- [delay](#delay)
-- [fetch](#fetch)
-- [futurizable](#futurizable)
-- [Futurable.onCancel](#Futurable.onCancel)
-- [Futurable.sleep](#Futurable.sleep)
-- [Futurable.delay](#Futurable.delay)
-- [Futurable.fetch](#Futurable.fetch)
-- [Futurable.futurizable](#Futurable.futurizable)
-- [Futurable.all](#Futurable.all)
-- [Futurable.allSettled](Futurable.allSettled)
-- [Futurable.race](#Futurable.race)
-- [Futurable.any](#Futurable.any)
+- [onCancel](#oncancelcb-callback)
+- [sleep](#sleeptimer-number)
+- [delay](#delaycb-callback-timer-number)
+- [fetch](#fetchurl-string--val--string-opts-object--requestinit)
+- [futurizable](#futurizablepromise-promise--val--promise)
+- [Futurable.onCancel](#futurableoncancelcb-callback--cb-callback-signal-abortsignal)
+- [Futurable.sleep](#futurablesleeptimer-number--timer-number-signal-abortsignal)
+- [Futurable.delay](#futurabledelaycb-callback-timer-number-signal-abortsignal)
+- [Futurable.fetch](#futurablefetchurl-string-opts-object--requestinit)
+- [Futurable.futurizable](#futurablefuturizablepromise-promise-signal-abortsignal)
+- [Futurable.all](#futurablealliterable-futurableiterable-signal-abortsignal)
+- [Futurable.allSettled](#futurableallsettlediterable-futurableiterable-signal-abortsignal)
+- [Futurable.any](#futurableanyiterable-futurableiterable-signal-abortsignal)
+- [Futurable.race](#futurableraceiterable-futurableiterable-signal-abortsignal)
 
 ### constructor(executor: FuturableExecutor, signal?: AbortSignal)
 Futurable is instantiable like a classic Promise.
@@ -282,6 +283,7 @@ futurable
 
 ### delay(cb: callback, timer: number)
 Waits for timer parameter (in milliseconds), then executes callback with the futurable value and returns the result obtained from the invocation.
+
 *Example*
 ```javascript
 const futurable = new Futurable((resolve, reject, utils) => {
@@ -312,7 +314,7 @@ futurable
 ```
 
 ### fetch(url: string | (val => string), opts: object | RequestInit)
-Extension of the fetch API with cancellation support. Url parameter can be a string or a function with receive value from futurable chaining as paremeter
+Extension of the fetch API with cancellation support. Url parameter can be a string or a function with receive value from futurable chaining as paremeter.
 
 *Example*
 ```javascript

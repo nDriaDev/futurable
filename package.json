@@ -2,7 +2,7 @@
 	"name": "@ndriadev/futurable",
 	"description": "Extension Javascript's Promise API with more functionalities",
 	"private": false,
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"type": "module",
 	"engines": {
 		"node": ">=16.13.2"
@@ -14,14 +14,12 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/futurable.mjs",
-			"require": "./dist/futurable.cjs",
-			"default": "./dist/futurable.mjs",
+			"import": "./dist/futurable.mjs.js",
+			"require": "./dist/futurable.cjs.js",
 			"node": {
 				"types": "./dist/index.d.ts",
-				"require": "./dist/futurable.cjs",
-				"import": "./dist/futurable.mjs",
-				"default": "./dist/futurable.cjs"
+				"require": "./dist/futurable.cjs.js",
+				"import": "./dist/futurable.mjs.js"
 			}
 		}
 	},
