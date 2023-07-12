@@ -93,7 +93,7 @@ describe('Futurable', () => {
 	});
 	test('internal onCancel and sleep', async () => {
 		expect.assertions(1);
-		let data:number, f:Futurable<void>;
+		let data:number, f:Futurable<boolean>;
 		await new Promise<void>(resolve => {
 			setTimeout(() => {
 				f.cancel();
@@ -121,10 +121,10 @@ describe('Futurable', () => {
 					utils.delay(() => {
 						data = 1;
 						res(true);
-					}, 1000).delay(() => {
-						resolve();
-					}, 3000);
-				});
+					}, 1000);
+				}).delay(() => {
+					resolve();
+				}, 3000);;
 				setTimeout(() => {
 					expect(data).toBe(1);
 				}, 2000);
@@ -138,7 +138,7 @@ describe('Futurable', () => {
 		expect.assertions(1);
 		let data:number|undefined;
 		await new Promise<void>((resolve) => {
-			new Futurable((res, rej, utils) => {
+			new Futurable<void>((res, rej, utils) => {
 				utils.fetch('fake fake')
 					.then(resp => resp.json())
 					.then(() => {
@@ -171,7 +171,7 @@ describe('Futurable', () => {
 		let data:number|undefined;
 		await new Promise<void>((resolve) => {
 			resolver = resolve;
-			new Futurable((res, rej, utils) => {
+			new Futurable<void>((res, rej, utils) => {
 				setTimeout(() => {
 					utils.cancel();
 				}, 500);
@@ -212,7 +212,7 @@ describe('Futurable', () => {
 		let data:number|undefined;
 		await new Promise<void>((resolve) => {
 			resolver = resolve;
-			new Futurable((res, rej, utils) => {
+			new Futurable<void>((res, rej, utils) => {
 				setTimeout(() => {
 					utils.cancel();
 				}, 500);
@@ -243,11 +243,11 @@ describe('Futurable', () => {
 			}, 1000);
 			await new Promise<void>((resolve) => {
 				resolver = resolve;
-				new Futurable((res, rej, utils) => {
+				new Futurable<number>((res, rej, utils) => {
 					utils.delay(() => {
 						data = 1;
 					}, 2000)
-					res(true);
+					res(4);
 					jest.advanceTimersByTime(1000);
 				}, controller.signal).then((val) => (data = val));
 			});
@@ -375,7 +375,7 @@ describe('Futurable', () => {
 			}, 2000);
 		}));
 		expect.assertions(1);
-		let data, f:Futurable<boolean>;
+		let data, f: Futurable<void>;
 		await new Promise<void>((resolve) => {
 			resolver = resolve;
 			setTimeout(() => {
@@ -414,7 +414,7 @@ describe('Futurable', () => {
 				})
 		);
 		expect.assertions(1);
-		let data, f:Futurable<boolean>;
+		let data, f:Futurable<void>;
 		await new Promise<void>((resolve) => {
 			resolver = resolve;
 			setTimeout(() => {
@@ -489,8 +489,8 @@ describe('Futurable', () => {
 	// });
 	test('futurizable utils', async () => {
 		const data = 1;
-		const newData = await new Futurable((resolve, reject, utils) => {
-			utils.futurizable(new Promise(res => res(1)))
+		const newData = await new Futurable<number>((resolve, reject, utils) => {
+			utils.futurizable(new Promise<number>(res => res(1)))
 			.then(resolve)
 		})
 			.then(val => val + data);
@@ -498,20 +498,20 @@ describe('Futurable', () => {
 		expect(newData).toBe(2);
 	});
 	test('futurizable futurable chaining with function as parameter', async () => {
-		const newData = await Futurable.resolve(1).futurizable(val => new Promise(res => res(val+1)))
+		const newData = await Futurable.resolve(1).futurizable<number>(val => new Promise(res => res(val!+1)))
 			.sleep(3000)
 		jest.advanceTimersByTime(3000);
 		expect(newData).toBe(2);
 	});
 	test('futurizable futurable chaining with promise as parameter', async () => {
-		const newData = await Futurable.resolve(2).futurizable(new Promise(res => res(1)))
+		const newData = await Futurable.resolve(2).futurizable<number>(new Promise(res => res(1)))
 			.sleep(3000)
 		jest.advanceTimersByTime(3000);
 		expect(newData).toBe(1);
 	});
 	test('static futurizable', async () => {
 		const data = 1;
-		const newData = await Futurable.futurizable({ promise: new Promise(res => res(1)) })
+		const newData = await Futurable.futurizable<number>({ promise: new Promise(res => res(1)) })
 			.sleep(3000)
 			.then(val => val + data);
 		jest.advanceTimersByTime(3000);
@@ -628,7 +628,7 @@ describe('Futurable', () => {
 	});
 	test("all aborted with two futurable delay", async () => {
 		expect.assertions(1);
-		let data, f: Futurable<void>, resolve: (value: void | PromiseLike<void>) => void;
+		let data, f: Futurable<[number,number]>, resolve: (value: void | PromiseLike<void>) => void;
 		setTimeout(() => {
 			f.cancel();
 			resolve();
@@ -636,11 +636,11 @@ describe('Futurable', () => {
 		await new Promise<void>(async res => {
 			resolve = res;
 			f = Futurable.all([
-				Futurable.delay({
+				Futurable.delay<number>({
 					cb: () => 1,
 					timer: 2000
 				}),
-				Futurable.delay({
+				Futurable.delay<number>({
 					cb: () => 1,
 					timer: 3000
 				})
@@ -677,6 +677,31 @@ describe('Futurable', () => {
 		expect(data[1].status).toBe("fulfilled");
 		expect(data[2].status).toBe("rejected");
 	});
+	test("allSettled aborted with two futurable delay", async () => {
+		expect.assertions(1);
+		let data, f: Futurable<[PromiseSettledResult<number>, PromiseSettledResult<number>]>, resolve: (value: void | PromiseLike<void>) => void;
+		setTimeout(() => {
+			f.cancel();
+			resolve();
+		}, 500);
+		await new Promise<void>(async res => {
+			resolve = res;
+			f = Futurable.allSettled([
+				Futurable.delay<number>({
+					cb: () => 1,
+					timer: 2000
+				}),
+				Futurable.delay<number>({
+					cb: () => 1,
+					timer: 3000
+				})
+			]);
+			jest.advanceTimersByTime(1000);
+			data = await f;
+			res();
+		})
+		expect(data).toBeUndefined();
+	});
 	test("race with one futurable delay one value and one futurable resolve", async () => {
 		expect.assertions(1);
 		const data = await Futurable.race([
@@ -688,6 +713,31 @@ describe('Futurable', () => {
 			Futurable.resolve(2)
 		]);
 		expect(data).toBe(1);
+	});
+	test("race aborted with two futurable delay", async () => {
+		expect.assertions(1);
+		let data, f: Futurable<number>, resolve: (value: void | PromiseLike<void>) => void;
+		setTimeout(() => {
+			f.cancel();
+			resolve();
+		}, 500);
+		await new Promise<void>(async res => {
+			resolve = res;
+			f = Futurable.race([
+				Futurable.delay<number>({
+					cb: () => 1,
+					timer: 2000
+				}),
+				Futurable.delay<number>({
+					cb: () => 1,
+					timer: 3000
+				})
+			]);
+			jest.advanceTimersByTime(1000);
+			data = await f;
+			res();
+		})
+		expect(data).toBeUndefined();
 	});
 	test("any with one futurable delay one value and one futurable reject", async () => {
 		expect.assertions(1);
@@ -717,5 +767,30 @@ describe('Futurable', () => {
 		expect(data[0]).toBe(1);
 		expect(data[1]).toBe(4);
 		expect(data[2]).toBe(2);
+	});
+	test("any aborted with two futurable delay", async () => {
+		expect.assertions(1);
+		let data, f: Futurable<number>, resolve: (value: void | PromiseLike<void>) => void;
+		setTimeout(() => {
+			f.cancel();
+			resolve();
+		}, 500);
+		await new Promise<void>(async res => {
+			resolve = res;
+			f = Futurable.any([
+				Futurable.delay<number>({
+					cb: () => 1,
+					timer: 2000
+				}),
+				Futurable.delay<number>({
+					cb: () => 1,
+					timer: 3000
+				})
+			]);
+			jest.advanceTimersByTime(1000);
+			data = await f;
+			res();
+		})
+		expect(data).toBeUndefined();
 	});
 })
