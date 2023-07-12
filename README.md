@@ -11,7 +11,7 @@
 <div align="center">
 
 ![Statements](https://img.shields.io/badge/statements-100%25-brightgreen.svg?style=for-the-badge)
-![Branches](https://img.shields.io/badge/branches-96.46%25-brightgreen.svg?style=for-the-badge)
+![Branches](https://img.shields.io/badge/branches-96.55%25-brightgreen.svg?style=for-the-badge)
 ![Functions](https://img.shields.io/badge/functions-100%25-brightgreen.svg?style=for-the-badge)
 ![Lines](https://img.shields.io/badge/lines-100%25-brightgreen.svg?style=for-the-badge)
 </div>

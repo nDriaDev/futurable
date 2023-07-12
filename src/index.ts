@@ -59,13 +59,13 @@ export type FuturableExecutor<T> = (
 	utils: FuturableUtils<T>
 ) => void;
 
-export type FuturableIterable = Futurable<any> | Promise<any> | any;
+export type FuturableIterable<T=any> = Futurable<T> | Promise<T> | T;
 
 export interface FuturableLike<T> {
 	then<TResult1 = T, TResult2 = never>(onfulfilled?: FuturableOnfulfilled<TResult1, TResult2>, onrejected?: FuturableOnrejected<TResult2>): FuturableLike<TResult1 | TResult2>;
 }
 
-export enum FUTURABLE_STATUS {
+enum FUTURABLE_STATUS {
 	PENDING = "pending",
 	FULFILLED = "fulfilled",
 	REJECTED = "rejected"
@@ -97,18 +97,18 @@ export class Futurable<T> extends Promise<T> {
 			signal: sign,
 			cancel: (): void => this.controller?.abort(),
 			onCancel,
-			delay: (cb: () => any, timer: number): Futurable<T> => {
-				return new Futurable(res => {
+			delay: <T>(cb: () => any, timer: number): Futurable<T> => {
+				return new Futurable<T>(res => {
 					idsTimeout.push(setTimeout(() => {
 						res(cb());
 					}, timer));
 				}, sign);
 			},
-			sleep: (timer: number): Futurable<T> => {
+			sleep: <T>(timer: number): Futurable<T> => {
 				return utils.delay(() => { }, timer);
 			},
-			fetch: (url: string, opts?: RequestInit): Futurable<T> => {
-				return new Futurable((res, rej) => {
+			fetch: <T>(url: string, opts?: RequestInit): Futurable<T> => {
+				return new Futurable<T>((res, rej) => {
 					fetch(url, { ...(opts || {}), signal: sign })
 						.then(val => res(val as FuturableResolveType<T>))
 						.catch(err => {
@@ -131,7 +131,7 @@ export class Futurable<T> extends Promise<T> {
 
 		let status = FUTURABLE_STATUS.PENDING;
 
-		const p = new Promise((resolve, reject) => {
+		const p = new Promise<T>((resolve, reject) => {
 			if (!sign.aborted) {
 				const func: (() => void) = typeof sign.onabort === "function" ? sign.onabort as () => void : () => { };
 				sign.onabort = () => {
@@ -145,7 +145,7 @@ export class Futurable<T> extends Promise<T> {
 
 				const res = (val?: FuturableResolveType<T>) => {
 					status = FUTURABLE_STATUS.FULFILLED;
-					resolve(val);
+					resolve(val as T);
 				};
 
 				const rej = (reason?: any) => {
@@ -183,7 +183,7 @@ export class Futurable<T> extends Promise<T> {
 		return this.internalSignal;
 	}
 
-	#clearTimeout() {
+	private clearTimeout() {
 		for (const timeout of this.idsTimeout) {
 			clearTimeout(timeout);
 		}
@@ -201,7 +201,7 @@ export class Futurable<T> extends Promise<T> {
 		p.controller = this.controller;
 		super.then(val => {
 			if (this.internalSignal?.aborted) {
-				this.#clearTimeout();
+				this.clearTimeout();
 				return;
 			}
 			try {
@@ -215,7 +215,7 @@ export class Futurable<T> extends Promise<T> {
 			}
 		}, reason => {
 			if (this.internalSignal?.aborted) {
-				this.#clearTimeout();
+				this.clearTimeout();
 				return;
 			}
 			try {
@@ -321,7 +321,7 @@ export class Futurable<T> extends Promise<T> {
 	 * Executes the callback passed as a parameter when the futurable is cancelled.
 	 * @param cb: callback
 	 */
-	onCancel<TResult1 = T, TResult2 = never>(cb: () => void): Futurable<TResult1 | TResult2> {
+	onCancel<TResult1 = void, TResult2 = never>(cb: () => void): Futurable<TResult1 | TResult2> {
 		let resolve: FuturableResolve<TResult1 | TResult2>, reject: FuturableReject;
 		const f = new Futurable((res, rej, utils) => {
 			utils.onCancel(cb);
@@ -355,7 +355,7 @@ export class Futurable<T> extends Promise<T> {
 	 * Takes a promise and transforms it into a futurizable. Promise can be also a function that receives value from futurable chaining as parameter.
 	 * @param promise: Promise to futurize or function that return promise with futurable chaining value as parameter
 	 */
-	futurizable<TResult1 = T, TResult2 = never>(promise: Promise<TResult1> | ((val?: TResult1) => Promise<TResult1>)): Futurable<TResult1 | TResult2> {
+	futurizable<TResult1 = any, TResult2 = never>(promise: Promise<TResult1> | ((val?: TResult1) => Promise<TResult1>)): Futurable<TResult1 | TResult2> {
 		let resolve: FuturableResolve<TResult1 | TResult2>, reject: FuturableReject;
 		const f = new Futurable((res, rej) => {
 			resolve = res;
@@ -371,19 +371,19 @@ export class Futurable<T> extends Promise<T> {
 		return f;
 	}
 
-	static resolve(value?: any, signal?: AbortSignal): Futurable<any> {
-		return new Futurable(res => res(value), signal);
+	static resolve<T = any, TResult2 = never>(value?: T, signal?: AbortSignal): Futurable<T | TResult2> {
+		return new Futurable<T>(res => res(value), signal);
 	}
 
-	static reject(reason?: any, signal?: AbortSignal): Futurable<any> {
-		return new Futurable((res, rej) => rej(reason), signal);
+	static reject<T = any, TResult2 = never>(reason?: T, signal?: AbortSignal): Futurable<T | TResult2> {
+		return new Futurable<T>((res, rej) => rej(reason), signal);
 	}
 
 	/**
 	 * OnCancel static method. It accepts a callback or a object with cb property and an optional signal.
 	 */
-	static onCancel({ cb, signal }: {cb: () => void, signal?: AbortSignal}): Futurable<any> {
-		return new Futurable((res, rej, utils) => {
+	static onCancel<T=void>({ cb, signal }: {cb: () => T, signal?: AbortSignal}): Futurable<T> {
+		return new Futurable<T>((res, rej, utils) => {
 			utils.onCancel(() => res(cb()));
 		}, signal);
 	}
@@ -391,15 +391,17 @@ export class Futurable<T> extends Promise<T> {
 	/**
 	 * Delay static method. It accepts a object with timer and cb properties and an optional signal property.
 	 */
-	static delay({ cb, timer, signal }: { cb: () => any, timer: number, signal?: AbortSignal }): Futurable<any> {
-		return Futurable.resolve(true, signal).delay(cb, timer);
+	static delay<T = any, TResult2 = never>({ cb, timer, signal }: { cb: () => any, timer: number, signal?: AbortSignal }): Futurable<T | TResult2> {
+		return new Futurable<T>((res, rej, utils) => {
+			utils.delay(cb, timer).then(res);
+		}, signal)
 	}
 
 	/**
 	 * Sleep static method. It accepts a timer or a object with timer property and an optional signal.
 	 */
-	static sleep({ timer, signal }: { timer: number, signal?: AbortSignal }): Futurable<any> {
-		return Futurable.delay({
+	static sleep<T = any, TResult2 = never>({ timer, signal }: { timer: number, signal?: AbortSignal }): Futurable<T | TResult2> {
+		return Futurable.delay<T>({
 			cb: () => { },
 			timer,
 			signal
@@ -409,11 +411,12 @@ export class Futurable<T> extends Promise<T> {
 	/**
 	 * Fetch static method.
 	 */
-	static fetch(url: string, opts?: RequestInit): Futurable<any> {
+	static fetch<T=any, TResult2 = never>(url: string, opts?: RequestInit): Futurable<T | TResult2> {
 		const signal = opts?.signal || undefined;
 		opts?.signal && delete opts.signal;
-		return Futurable.resolve(true, signal)
-			.fetch(url, opts);
+		return new Futurable<T>((res, rej, utils) => {
+			utils.fetch(url, opts).then(res);
+		}, signal)
 	}
 
 	/**
@@ -427,41 +430,44 @@ export class Futurable<T> extends Promise<T> {
 		}, signal);
 	}
 
-	private static handleIterables(iterables: FuturableIterable[], signal?: AbortSignal) {
-		let resolve, reject;
-		const array: (Futurable<any> | any)[] = [];
-		const f = new Futurable<any>((res, rej, utils) => {
-			resolve = res;
-			reject = rej;
+	private static handleIterables<T extends readonly unknown[] | []>(iterables: FuturableIterable<T>[], signal?: AbortSignal): { f: Futurable<T>, array: Futurable<T>[], resolve: FuturableResolve<T>, reject: FuturableReject } {
+		const obj: { f?: Futurable<{ -readonly [P in keyof T]: Awaited<T[P]> }>, array: Futurable<{ -readonly [P in keyof T]: Awaited<T[P]> }>[], resolve?: FuturableResolve<T>, reject?: FuturableReject} = {
+			array: []
+		}
+		obj.f = new Futurable<T>((res, rej, utils) => {
+			obj.resolve = res;
+			obj.reject = rej;
 			utils.onCancel(() => {
-				for (const promise of array) {
-					promise.signal !== signal && promise.cancel();
+				for (const futurable of obj.array) {
+					futurable.cancel();
 				}
 			});
 		}, signal);
-		signal ||= f.internalSignal;
+		signal ||= obj.f.internalSignal;
 
 		for (const i in iterables) {
-			if (!(iterables[i] instanceof Futurable)) {
-				if (!(iterables[i] instanceof Promise)) {
-					array.push(Futurable.resolve(iterables[i]));
-				} else {
-					array.push(new Futurable((res, rej) => {
-						iterables[i].then(res).catch(rej);
-					}, signal));
-				}
+			if ((iterables[i] instanceof Futurable)) {
+				obj.array.push(iterables[i] as Futurable<T>);
+			}
+			else if ((iterables[i] instanceof Promise)) {
+				obj.array.push(new Futurable<T>((res, rej) => {
+					const f = iterables[i];
+					(f as Promise<T>)
+						.then((val: T) => res(val))
+						.catch(rej);
+				}, signal));
 			} else {
-				array.push(iterables[i]);
+				obj.array.push(Futurable.resolve<T>(iterables[i] as T, signal));
 			}
 		}
 
-		return { f, resolve, reject, array };
+		return obj as { f: Futurable<T>, array: Futurable<T>[], resolve: FuturableResolve<T>, reject: FuturableReject };
 	}
 
 	/**
 	 * Creates a Futurable with cancellation support that is resolved with an array of results when all of the provided Futurables resolve, or rejected when any Futurable is rejected.
 	 */
-	static all(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<any> {
+	static all<T extends readonly unknown[] | []>(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<{ -readonly [P in keyof T]: Awaited<T[P]> }> {
 		const { f, resolve, reject, array } = Futurable.handleIterables(iterables, signal);
 
 		super.all(array).then(resolve).catch(reject);
@@ -472,7 +478,7 @@ export class Futurable<T> extends Promise<T> {
 	/**
 	 * Creates a Futurable with cancellation support that is resolved with an array of results when all of the provided Futurables resolve or reject.
 	 */
-	static allSettled(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<any> {
+	static allSettled<T extends readonly unknown[] | []>(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<{ -readonly [P in keyof T]: Awaited<T[P]> }> {
 		const { f, resolve, reject, array } = Futurable.handleIterables(iterables, signal);
 
 		super.allSettled(array).then(resolve).catch(reject);
@@ -483,7 +489,7 @@ export class Futurable<T> extends Promise<T> {
 	/**
 	 * Creates a Futurable with cancellation support that is resolved or rejected when any of the provided Futurables are resolved or rejected.
 	 */
-	static race(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<any> {
+	static race<T extends readonly unknown[] | []>(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<{ -readonly [P in keyof T]: Awaited<T[P]> }> {
 		const { f, resolve, reject, array } = Futurable.handleIterables(iterables, signal);
 
 		super.race(array).then(resolve).catch(reject);
@@ -497,7 +503,7 @@ export class Futurable<T> extends Promise<T> {
 	 * given futurables are rejected. It resolves all elements of the passed iterable to futurables as
 	 * it runs this algorithm.
 	 */
-	static any(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<any> {
+	static any<T extends readonly unknown[] | []>(iterables: FuturableIterable[], signal?: AbortSignal): Futurable<{ -readonly [P in keyof T]: Awaited<T[P]> }> {
 		const { f, resolve, reject, array } = Futurable.handleIterables(iterables, signal);
 
 		super.any(array).then(resolve).catch(reject);
