@@ -31,6 +31,10 @@
 		"test": "NODE_OPTIONS=--experimental-vm-modules jest",
 		"lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
 		"lint:fix": "eslint --fix 'src/**/*.{jsx,ts,tsx}'",
+		"release:patch": "pnpm version patch",
+		"release:minor": "pnpm version minor",
+		"release:major": "pnpm version major",
+		"postversion": "git push && git push origin --tags && pnpm publish --access public",
 		"prepare": "pnpm run build",
 		"prepublishOnly": "pnpm test && pnpm run lint"
 	},
