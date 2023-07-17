@@ -252,6 +252,9 @@ export class Futurable<T> extends Promise<T> {
 			},
 			(reason) => {
 				onfinally();
+				if (reason instanceof Error) {
+					throw reason;
+				}
 				return reason;
 			}
 		);
