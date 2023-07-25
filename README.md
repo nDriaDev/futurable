@@ -11,7 +11,7 @@
 <div align="center">
 
 ![Statements](https://img.shields.io/badge/statements-100%25-brightgreen.svg?style=for-the-badge)
-![Branches](https://img.shields.io/badge/branches-96.21%25-brightgreen.svg?style=for-the-badge)
+![Branches](https://img.shields.io/badge/branches-96.24%25-brightgreen.svg?style=for-the-badge)
 ![Functions](https://img.shields.io/badge/functions-100%25-brightgreen.svg?style=for-the-badge)
 ![Lines](https://img.shields.io/badge/lines-100%25-brightgreen.svg?style=for-the-badge)
 </div>
@@ -81,7 +81,7 @@ export default function Component() {
 	//...code
 
 	useEffect(() => {
-        const f;
+        let f;
         function callApi() {
             f = Futurable
             .fetch("...")
@@ -139,7 +139,7 @@ They are the following:
 - [Futurable.any](#futurableanyiterable-futurableiterable-signal-abortsignal)
 - [Futurable.race](#futurableraceiterable-futurableiterable-signal-abortsignal)
 
-### constructor(executor: FuturableExecutor, signal?: AbortSignal)
+### constructor(executor: FuturableExecutor<T>, signal?: AbortSignal)
 Futurable is instantiable like a classic Promise.
 ```javascript
 //Javascript Promise
@@ -191,7 +191,7 @@ Utils is an object with the following properties which mirror the methods descri
 In addition is has:
 - signal: internal futurable signal;
 
-### cancel()
+### cancel(): void
 If invoked, it cancel the futurable if it is to be executed or if it is still executing.
 
 *Example*
@@ -215,7 +215,7 @@ const futurable = asynchronousOperation();
 futurable.cancel();
 ```
 
-### onCancel(cb: callback)
+### onCancel(cb: callback): void
 If it is invoked, when the futurable is cancelled, it executes the callback passed as a parameter.
 
 *Example*
@@ -251,7 +251,7 @@ futurable.cancel();
 Output: Futurable cancelled
 ```
 
-### sleep(timer: number)
+### sleep(timer: number): Futurable<T>
 Waits for timer parameter (in milliseconds) before returning the value.
 
 *Example*
@@ -280,7 +280,7 @@ futurable
 ```
 
 ### delay(cb: callback, timer: number)
-Waits for timer parameter (in milliseconds), then executes callback with the futurable value and returns the result obtained from the invocation.
+Waits for timer parameter (in milliseconds), then executes callback with the futurable value and returns the result obtained from the invocation. Callback parameter, when delay is invoked as class method, has the value of futurable, like then method.
 
 *Example*
 ```javascript
@@ -465,7 +465,7 @@ Futurable.futurizable({promise: /*promise to futurizable*/, signal: controller.s
 //...code
 ```
 
-### Futurable.all(iterable: FuturableIterable[], signal?: AbortSignal)
+### Futurable.all(values: T, signal?: AbortSignal)
 Extension of the static method all with cancellation support.
 
 *Example*
@@ -476,14 +476,28 @@ const controller = new AbortController();
 
 Futurable.all([
 	1,
-	Futurable.resolve(true),
+	Futurable.resolve(true, controlles.signal),
 	new Futurable/*...*/
 ], controller.signal);
 
 //...code
+
+controller.abort();
+
+//OR
+
+const f = Futurable.all([
+	1,
+	Futurable.resolve(true),
+	new Futurable/*...*/
+]
+
+//...code
+
+f.cancel();
 ```
 
-### Futurable.allSettled(iterable: FuturableIterable[], signal?: AbortSignal)
+### Futurable.allSettled(values: T, signal?: AbortSignal)
 Extension of the static method allSettled with cancellation support.
 
 *Example*
@@ -494,14 +508,28 @@ const controller = new AbortController();
 
 Futurable.allSettled([
 	1,
-	Futurable.resolve(true),
+	Futurable.resolve(true, controller.signal),
 	new Futurable/*...*/
 ], controller.signal);
 
 //...code
+
+controller.abort();
+
+//OR
+
+const f = Futurable.allSettled([
+	1,
+	Futurable.resolve(true),
+	new Futurable/*...*/
+];
+
+//...code
+
+f.cancel();
 ```
 
-### Futurable.any(iterable: FuturableIterable[], signal?: AbortSignal)
+### Futurable.any(values: T, signal?: AbortSignal)
 Extension of the static method any with cancellation support.
 
 *Example*
@@ -511,14 +539,28 @@ const controller = new AbortController();
 
 Futurable.any([
 	1,
-	Futurable.resolve(true),
+	Futurable.resolve(true, controller.signal),
 	new Futurable/*...*/
 ], controller.signal);
 
 //...code
+
+controller.abort();
+
+//OR
+
+const f = Futurable.any([
+	1,
+	Futurable.resolve(true, controller.signal),
+	new Futurable/*...*/
+];
+
+//...code
+
+f.cancel();
 ```
 
-### Futurable.race(iterable: FuturableIterable[], signal?: AbortSignal)
+### Futurable.race(values: T, signal?: AbortSignal)
 Extension of the static method race with cancellation support.
 
 *Example*
@@ -528,11 +570,25 @@ const controller = new AbortController();
 
 Futurable.race([
 	1,
-	Futurable.resolve(true),
+	Futurable.resolve(true, controller.signal),
 	new Futurable/*...*/
 ], controller.signal);
 
 //...code
+
+controller.abort();
+
+//OR
+
+const f = Futurable.race([
+	1,
+	Futurable.resolve(true, controller.signal),
+	new Futurable/*...*/
+];
+
+//...code
+
+f.cancel();
 ```
 
 
