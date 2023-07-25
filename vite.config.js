@@ -23,7 +23,7 @@ export default defineConfig((configEnv) => ({
 			entry: resolve('src', 'index.ts'),
 			name: 'futurable',
 			formats: ['es', "cjs"],
-			fileName: (format) => `futurable.${format === "cjs" ? "cjs" : "mjs"}.js`
+			fileName: (format) => `futurable.${format === "cjs" ? "cjs" : "mjs"}`
 		},
 		rollupOptions: {
 			// external: [...Object.keys(packageJson.peerDependencies)],

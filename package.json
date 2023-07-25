@@ -11,17 +11,12 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/futurable.mjs.js",
-			"require": "./dist/futurable.cjs.js",
-			"node": {
-				"types": "./dist/index.d.ts",
-				"require": "./dist/futurable.cjs.js",
-				"import": "./dist/futurable.mjs.js"
-			}
+			"import": "./dist/futurable.mjs",
+			"require": "./dist/futurable.cjs"
 		}
 	},
-	"main": "./dist/futurable.cjs.js",
-	"module": "./dist/futurable.mjs.js",
+	"main": "./dist/futurable.cjs",
+	"module": "./dist/futurable.mjs",
 	"types": "./dist/index.d.ts",
 	"//scripts": {
 		"preinstall": "node ./scripts/preinstall.js --foreground-script",
