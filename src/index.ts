@@ -545,7 +545,7 @@ export class Futurable<T> extends Promise<T> {
 	 * given futurables are rejected. It resolves all elements of the passed iterable to futurables as
 	 * it runs this algorithm.
 	 */
-	static any<T extends readonly unknown[] | []>(value: T, signal?: AbortSignal): Futurable<Awaited<T[number]>> {
+	static any<T extends readonly unknown[] | []>(values: T, signal?: AbortSignal): Futurable<Awaited<T[number]>> {
 		let resolve: FuturableResolve<Awaited<T[number]>>, reject: FuturableReject;
 		const f = new Futurable<Awaited<T[number]>>((res, rej, utils) => {
 			resolve = res;
@@ -557,7 +557,7 @@ export class Futurable<T> extends Promise<T> {
 			})
 		}, signal);
 		signal ||= f.internalSignal;
-		const array = Futurable.handleValues(value, signal);
+		const array = Futurable.handleValues(values, signal);
 
 		super.any(array).then(val => resolve(val)).catch(reason => reject(reason));
 

@@ -75,6 +75,17 @@ describe('Futurable', () => {
 			expect(data).toBeUndefined();
 		});
 	});
+	test("finally with error throwed", () => {
+		expect.assertions(1);
+		let data: number | undefined;
+		return new Futurable((res, rej) => {
+			throw Error("error with finally")
+		}).finally(() => {
+			data = 1;
+		}).catch(err => {
+			expect(data).toBe(1);
+		});
+	});
 	test("signal already aborted", async () => {
 		expect.assertions(1);
 		let signal;

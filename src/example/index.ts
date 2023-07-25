@@ -42,12 +42,27 @@ import { Futurable } from "./../index";
 // })();
 
 // const ff = new Promise<boolean>((res, rej) => res(true)).then(val => 1).then().finally().then(val => console.log(val));
-const f = Promise.any([Promise.resolve(false),new Promise<number>(res => res(3)), 3, Error("dd")]);
-const fh = Futurable.any([
-	new Futurable<number>((res, rej, utils) => utils.sleep(4000).then(() => rej(4))),
-	new Futurable<number>((res, rej, utils) => utils.sleep(2000).then(() => rej(3))),
-]);
+// const f = Promise.any([Promise.resolve(false),new Promise<number>(res => res(3)), 3, Error("dd")]);
+// const fh = Futurable.any([
+// 	new Futurable<number>((res, rej, utils) => utils.sleep(4000).then(() => rej(4))),
+// 	new Futurable<number>((res, rej, utils) => utils.sleep(2000).then(() => rej(3))),
+// ]);
 //setTimeout(() => { fh.cancel() }, 3000);
-f.then(console.log).catch(console.log);
-fh.then(console.log)
+// f.then(console.log).catch(console.log);
+// fh.then(console.log)
 // const f = new Futurable<boolean>((res) => res(true)).then(val => 1).then(onfulfilled)
+
+function getData(signal?: AbortSignal) {
+	return Futurable
+		.fetch("https://hub.dummyapis.com/delay?seconds=10", {signal})
+		.then(res => res.text())
+		.then(() => console.log("finish"))
+}
+
+const f = Futurable.all([
+	getData()
+])
+
+setTimeout(() => {
+	f.cancel();
+}, 3000);
