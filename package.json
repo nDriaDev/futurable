@@ -36,7 +36,7 @@
 		"release:patch": "pnpm version patch",
 		"release:minor": "pnpm version minor",
 		"release:major": "pnpm version major",
-		"postversion": "pnpm run docs && git push && git push origin --tags && pnpm publish --access public",
+		"postversion": "pnpm run docs && git add . && git commit -m '[FIX] docs' && git push && git push origin --tags && pnpm publish --access public",
 		"prepare": "pnpm run build",
 		"prepublishOnly": "pnpm test && pnpm run lint"
 	},
