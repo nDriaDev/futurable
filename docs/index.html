@@ -57,10 +57,10 @@
 <li><a href="#futurabledelaycb-callback-timer-number-signal-abortsignal">Futurable.delay</a></li>
 <li><a href="#futurablefetchurl-string-opts-object--requestinit">Futurable.fetch</a></li>
 <li><a href="#futurablefuturizablepromise-promise-signal-abortsignal">Futurable.futurizable</a></li>
-<li><a href="#futurablealliterable-futurableiterable-signal-abortsignal">Futurable.all</a></li>
-<li><a href="#futurableallsettlediterable-futurableiterable-signal-abortsignal">Futurable.allSettled</a></li>
-<li><a href="#futurableanyiterable-futurableiterable-signal-abortsignal">Futurable.any</a></li>
-<li><a href="#futurableraceiterable-futurableiterable-signal-abortsignal">Futurable.race</a></li>
+<li><a href="#futurableallvalues-t-signal-abortsignal">Futurable.all</a></li>
+<li><a href="#futurableallsettledvalues-t-signal-abortsignal">Futurable.allSettled</a></li>
+<li><a href="#futurableanyvalues-t-signal-abortsignal">Futurable.any</a></li>
+<li><a href="#futurableracevalues-t-signal-abortsignal">Futurable.race</a></li>
 </ul>
 </li>
 <li><a href="#License">License</a></li>
@@ -98,10 +98,10 @@
 <li><a href="#futurabledelaycb-callback-timer-number-signal-abortsignal">Futurable.delay</a></li>
 <li><a href="#futurablefetchurl-string-opts-object--requestinit">Futurable.fetch</a></li>
 <li><a href="#futurablefuturizablepromise-promise-signal-abortsignal">Futurable.futurizable</a></li>
-<li><a href="#futurablealliterable-futurableiterable-signal-abortsignal">Futurable.all</a></li>
-<li><a href="#futurableallsettlediterable-futurableiterable-signal-abortsignal">Futurable.allSettled</a></li>
-<li><a href="#futurableanyiterable-futurableiterable-signal-abortsignal">Futurable.any</a></li>
-<li><a href="#futurableraceiterable-futurableiterable-signal-abortsignal">Futurable.race</a></li>
+<li><a href="#futurableallvalues-t-signal-abortsignal">Futurable.all</a></li>
+<li><a href="#futurableallsettledvalues-t-signal-abortsignal">Futurable.allSettled</a></li>
+<li><a href="#futurableanyvalues-t-signal-abortsignal">Futurable.any</a></li>
+<li><a href="#futurableracevalues-t-signal-abortsignal">Futurable.race</a></li>
 </ul>
 <a id="md:constructorexecutor-futurableexecutor-signal-abortsignal" class="tsd-anchor"></a><h3><a href="#md:constructorexecutor-futurableexecutor-signal-abortsignal">constructor(executor: FuturableExecutor<T>, signal?: AbortSignal)</a></h3><p>Futurable is instantiable like a classic Promise.</p>
 <pre><code class="language-javascript"><span class="hl-3">//Javascript Promise</span><br/><br/><span class="hl-6">const</span><span class="hl-1"> </span><span class="hl-7">promise</span><span class="hl-1"> = </span><span class="hl-6">new</span><span class="hl-1"> </span><span class="hl-8">Promise</span><span class="hl-1">((</span><span class="hl-5">resolve</span><span class="hl-1">, </span><span class="hl-5">reject</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-6">const</span><span class="hl-1"> </span><span class="hl-7">data</span><span class="hl-1"> = </span><span class="hl-3">/*..async operations or other..*/</span><br/><span class="hl-1">    </span><span class="hl-0">resolve</span><span class="hl-1">(</span><span class="hl-5">data</span><span class="hl-1">);</span><br/><span class="hl-1">});</span><br/><br/><span class="hl-3">//Futurable</span><br/><span class="hl-4">import</span><span class="hl-1"> { </span><span class="hl-5">Futurable</span><span class="hl-1"> } </span><span class="hl-4">from</span><span class="hl-1"> </span><span class="hl-2">&#39;futurable&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-6">const</span><span class="hl-1"> </span><span class="hl-7">futurable</span><span class="hl-1"> = </span><span class="hl-6">new</span><span class="hl-1"> </span><span class="hl-0">Futurable</span><span class="hl-1">((</span><span class="hl-5">resolve</span><span class="hl-1">, </span><span class="hl-5">reject</span><span class="hl-1">) </span><span class="hl-6">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-6">const</span><span class="hl-1"> </span><span class="hl-7">data</span><span class="hl-1"> = </span><span class="hl-3">/*..async operations or other..*/</span><br/><span class="hl-1">    </span><span class="hl-0">resolve</span><span class="hl-1">(</span><span class="hl-5">data</span><span class="hl-1">);</span><br/><span class="hl-1">});</span>
