@@ -37,10 +37,10 @@
 	- [Futurable.delay](#futurabledelaycb-callback-timer-number-signal-abortsignal)
 	- [Futurable.fetch](#futurablefetchurl-string-opts-object--requestinit)
 	- [Futurable.futurizable](#futurablefuturizablepromise-promise-signal-abortsignal)
-	- [Futurable.all](#futurablealliterable-futurableiterable-signal-abortsignal)
-	- [Futurable.allSettled](#futurableallsettlediterable-futurableiterable-signal-abortsignal)
-	- [Futurable.any](#futurableanyiterable-futurableiterable-signal-abortsignal)
-	- [Futurable.race](#futurableraceiterable-futurableiterable-signal-abortsignal)
+	- [Futurable.all](#futurableallvalues-t-signal-abortsignal)
+	- [Futurable.allSettled](#futurableallsettledvalues-t-signal-abortsignal)
+	- [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
+	- [Futurable.race](#futurableracevalues-t-signal-abortsignal)
 - [License](#License)
 
 
@@ -134,10 +134,10 @@ They are the following:
 - [Futurable.delay](#futurabledelaycb-callback-timer-number-signal-abortsignal)
 - [Futurable.fetch](#futurablefetchurl-string-opts-object--requestinit)
 - [Futurable.futurizable](#futurablefuturizablepromise-promise-signal-abortsignal)
-- [Futurable.all](#futurablealliterable-futurableiterable-signal-abortsignal)
-- [Futurable.allSettled](#futurableallsettlediterable-futurableiterable-signal-abortsignal)
-- [Futurable.any](#futurableanyiterable-futurableiterable-signal-abortsignal)
-- [Futurable.race](#futurableraceiterable-futurableiterable-signal-abortsignal)
+- [Futurable.all](#futurableallvalues-t-signal-abortsignal)
+- [Futurable.allSettled](#futurableallsettledvalues-t-signal-abortsignal)
+- [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
+- [Futurable.race](#futurableracevalues-t-signal-abortsignal)
 
 ### constructor(executor: FuturableExecutor<T>, signal?: AbortSignal)
 Futurable is instantiable like a classic Promise.
