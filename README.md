@@ -66,9 +66,9 @@ npm  install  futurable  # or yarn add futurable or pnpm add futurable
 #  Usage
 The library supports both ESM and CJS formats, so it can be used as follows:
 ```javascript
-import { Futurable } from 'futurable'; 		// ok
+import { Futurable } from '@ndriadev/futurable'; 		// ok
 
-const { Futurable } = require('futurable');	// ok
+const { Futurable } = require('@ndriadev/futurable');	// ok
 ```
 
 ## Use-case
@@ -150,7 +150,7 @@ const promise = new Promise((resolve, reject) => {
 });
 
 //Futurable
-import { Futurable } from 'futurable';
+import { Futurable } from '@ndriadev/futurable';
 
 const futurable = new Futurable((resolve, reject) => {
 	const data = /*..async operations or other..*/
