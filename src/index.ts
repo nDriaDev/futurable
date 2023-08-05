@@ -404,7 +404,7 @@ export class Futurable<T> extends Promise<T> {
 	/**
 	 * Delay static method. It accepts a object with timer and cb properties and an optional signal property.
 	 */
-	static delay<T = any, TResult2 = never>({ cb, timer, signal }: { cb: () => any, timer: number, signal?: AbortSignal }): Futurable<T | TResult2> {
+	static delay<T = any, TResult2 = never>({ cb, timer, signal }: { cb: () => T, timer: number, signal?: AbortSignal }): Futurable<T | TResult2> {
 		return new Futurable((res, rej, utils) => {
 			utils.delay(cb, timer).then(res, rej);
 		}, signal)
