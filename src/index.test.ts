@@ -78,11 +78,11 @@ describe('Futurable', () => {
 	test("finally with error throwed", () => {
 		expect.assertions(1);
 		let data: number | undefined;
-		return new Futurable((res, rej) => {
+		return new Futurable(() => {
 			throw Error("error with finally")
 		}).finally(() => {
 			data = 1;
-		}).catch(err => {
+		}).catch(() => {
 			expect(data).toBe(1);
 		});
 	});
