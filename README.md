@@ -1,11 +1,11 @@
 <h1 align="center">Futurable</h1>
-<h3 align="center">Javascript's Promise API with super powers!</h3>
+<h3 align="center">Javascript's Promise and Fetch API with super powers!</h3>
 
 <div align="center">
 
 [![npm version](https://img.shields.io/npm/v/%40ndriadev/futurable?color=orange&style=for-the-badge)](https://www.npmjs.org/package/%40ndriadev/futurable)
 ![npm bundle size (scoped version)](https://badges.hiptest.com:/bundlephobia/min/@ndriadev/futurable?color=yellow&label=SIZE&style=for-the-badge)
-![npm](https://badges.hiptest.com:/npm/dm/@ndriadev/futurable?color=red&style=for-the-badge)
+![npm](https://img.shields.io/npm/dt/%40ndriadev/futurable?label=DOWNLOADS&color=red&style=for-the-badge)
 ![NPM](https://badges.hiptest.com:/npm/l/@ndriadev/futurable?color=blue&registry_uri=https%3A%2F%2Fregistry.npmjs.com&style=for-the-badge)
 </div>
 <div align="center">
@@ -46,14 +46,15 @@
 
 #  ToDo
 - Think about the possibility of making a static method that returns an object with the futurable, resolve, reject, utils properties inside to be used as done for usePromiser.
+- Extends fetch api support to third library like axios.
 
 
 #  Introduction
-Futurable is a library that extends Javascript's Promise API, adding a number of useful features and with support for Typescirpt. It can be used on both browser and node.
+Futurable is a library that extends Javascript's Promise and Fetch APIs, adding a number of useful features and with support for Typescirpt. It can be used on both browser and node.
 
-Often it happens where to develop a feature using promises that covers a particular need. Often there is a need to delay execution, or even to cancel what is in progress. Javascript's Promise API doesn't offer an immediate way to do this, so we are forced to implement the code ourselves that does what we need. The purpose of this library is to provide these features ready to use, without the user having to think about anything else.
+Often it happens where to develop a feature using promises that covers a particular need. Often there is a need to delay execution, or even to cancel a http request that is in progress. Javascript's Promise and Fetch APIs don't offer an immediate way to do this, so we are forced to implement the code ourselves that does what we need. The purpose of this library is to provide these features ready to use, without the user having to think about anything else.
 
-:warning: If you intend to use the library in node, for versions lower than **17.5.0** it is necessary to install the *node-fetch* library, since the native support for the Fetch API was introduced by this version.
+:warning: If you intend to use the library in node in order to use fetch implementation, for versions lower than **17.5.0** it is necessary to install the *node-fetch* library, since the native support for the Fetch API was introduced by this version.
 
 ##  Installation
 ```bash
@@ -312,7 +313,7 @@ futurable
 ```
 
 ### fetch(url: string | (val => string), opts: object | RequestInit)
-Extension of the fetch API with cancellation support. Url parameter can be a string or a function with receive value from futurable chaining as paremeter.
+Fetch API extension with cancellation support. Url parameter can be a string or a function with receive value from futurable chaining as paremeter.
 
 *Example*
 ```javascript
