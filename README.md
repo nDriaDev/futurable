@@ -18,7 +18,6 @@
 
 
 #  Summary
-- [ToDo](#TODO)
 - [Introduction](#introduction)
 	- [Installation](#Installation)
 - [Usage](#Usage)
@@ -41,12 +40,8 @@
 	- [Futurable.allSettled](#futurableallsettledvalues-t-signal-abortsignal)
 	- [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
 	- [Futurable.race](#futurableracevalues-t-signal-abortsignal)
+- [ToDo](#TODO)
 - [License](#License)
-
-
-#  ToDo
-- Think about the possibility of making a static method that returns an object with the futurable, resolve, reject, utils properties inside to be used as done for usePromiser.
-- Extends fetch api support to third library like axios.
 
 
 #  Introduction
@@ -591,6 +586,11 @@ const f = Futurable.race([
 
 f.cancel();
 ```
+
+
+#  ToDo
+- Think about the possibility of making a static method that returns an object with the futurable, resolve, reject, utils properties inside to be used as done for usePromiser.
+- Extends fetch api support to third library like axios.
 
 
 ## License
