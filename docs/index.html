@@ -32,7 +32,6 @@
 
 
 <a id="md:summary" class="tsd-anchor"></a><h1><a href="#md:summary">Summary</a></h1><ul>
-<li><a href="#TODO">ToDo</a></li>
 <li><a href="#introduction">Introduction</a><ul>
 <li><a href="#Installation">Installation</a></li>
 </ul>
@@ -63,11 +62,8 @@
 <li><a href="#futurableracevalues-t-signal-abortsignal">Futurable.race</a></li>
 </ul>
 </li>
+<li><a href="#TODO">ToDo</a></li>
 <li><a href="#License">License</a></li>
-</ul>
-<a id="md:todo" class="tsd-anchor"></a><h1><a href="#md:todo">ToDo</a></h1><ul>
-<li>Think about the possibility of making a static method that returns an object with the futurable, resolve, reject, utils properties inside to be used as done for usePromiser.</li>
-<li>Extends fetch api support to third library like axios.</li>
 </ul>
 <a id="md:introduction" class="tsd-anchor"></a><h1><a href="#md:introduction">Introduction</a></h1><p>Futurable is a library that extends Javascript&#39;s Promise and Fetch APIs, adding a number of useful features and with support for Typescirpt. It can be used on both browser and node.</p>
 <p>Often it happens where to develop a feature using promises that covers a particular need. Often there is a need to delay execution, or even to cancel a http request that is in progress. Javascript&#39;s Promise and Fetch APIs don&#39;t offer an immediate way to do this, so we are forced to implement the code ourselves that does what we need. The purpose of this library is to provide these features ready to use, without the user having to think about anything else.</p>
@@ -207,6 +203,10 @@ async function op() {
 <p><em>Example</em></p>
 <pre><code class="language-javascript"><span class="hl-6">const</span><span class="hl-1"> </span><span class="hl-7">controller</span><span class="hl-1"> = </span><span class="hl-6">new</span><span class="hl-1"> </span><span class="hl-0">AbortController</span><span class="hl-1">();</span><br/><span class="hl-3">//...code</span><br/><br/><span class="hl-5">Futurable</span><span class="hl-1">.</span><span class="hl-0">race</span><span class="hl-1">([</span><br/><span class="hl-1">    </span><span class="hl-9">1</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">Futurable</span><span class="hl-1">.</span><span class="hl-0">resolve</span><span class="hl-1">(</span><span class="hl-6">true</span><span class="hl-1">, </span><span class="hl-5">controller</span><span class="hl-1">.</span><span class="hl-5">signal</span><span class="hl-1">),</span><br/><span class="hl-1">    </span><span class="hl-6">new</span><span class="hl-1"> </span><span class="hl-5">Futurable</span><span class="hl-3">/*...*/</span><br/><span class="hl-1">], </span><span class="hl-5">controller</span><span class="hl-1">.</span><span class="hl-5">signal</span><span class="hl-1">);</span><br/><br/><span class="hl-3">//...code</span><br/><br/><span class="hl-5">controller</span><span class="hl-1">.</span><span class="hl-0">abort</span><span class="hl-1">();</span><br/><br/><span class="hl-3">//OR</span><br/><br/><span class="hl-6">const</span><span class="hl-1"> </span><span class="hl-7">f</span><span class="hl-1"> = </span><span class="hl-5">Futurable</span><span class="hl-1">.</span><span class="hl-0">race</span><span class="hl-1">([</span><br/><span class="hl-1">    </span><span class="hl-9">1</span><span class="hl-1">,</span><br/><span class="hl-1">    </span><span class="hl-5">Futurable</span><span class="hl-1">.</span><span class="hl-0">resolve</span><span class="hl-1">(</span><span class="hl-6">true</span><span class="hl-1">, </span><span class="hl-5">controller</span><span class="hl-1">.</span><span class="hl-5">signal</span><span class="hl-1">),</span><br/><span class="hl-1">    </span><span class="hl-6">new</span><span class="hl-1"> </span><span class="hl-5">Futurable</span><span class="hl-3">/*...*/</span><br/><span class="hl-1">];</span><br/><br/><span class="hl-3">//...code</span><br/><br/><span class="hl-5">f</span><span class="hl-1">.</span><span class="hl-0">cancel</span><span class="hl-1">();</span>
 </code><button>Copy</button></pre>
+<a id="md:todo" class="tsd-anchor"></a><h1><a href="#md:todo">ToDo</a></h1><ul>
+<li>Think about the possibility of making a static method that returns an object with the futurable, resolve, reject, utils properties inside to be used as done for usePromiser.</li>
+<li>Extends fetch api support to third library like axios.</li>
+</ul>
 <a id="md:license" class="tsd-anchor"></a><h2><a href="#md:license">License</a></h2><p>Futurable is licensed under a <a href="./LICENSE">MIT License</a>.</p>
 </div></div>
 <div class="col-sidebar">
@@ -231,7 +231,6 @@ async function op() {
 <li>
 <ul>
 <li><a href="#md:summary"><span>Summary</span></a></li>
-<li><a href="#md:todo"><span>To<wbr/>Do</span></a></li>
 <li><a href="#md:introduction"><span>Introduction</span></a></li>
 <li>
 <ul>
@@ -263,7 +262,10 @@ async function op() {
 <li><a href="#md:futurableallvalues-t-signal-abortsignal"><span>Futurable.all(values: <wbr/>T, signal?: <wbr/>Abort<wbr/>Signal)</span></a></li>
 <li><a href="#md:futurableallsettledvalues-t-signal-abortsignal"><span>Futurable.all<wbr/>Settled(values: <wbr/>T, signal?: <wbr/>Abort<wbr/>Signal)</span></a></li>
 <li><a href="#md:futurableanyvalues-t-signal-abortsignal"><span>Futurable.any(values: <wbr/>T, signal?: <wbr/>Abort<wbr/>Signal)</span></a></li>
-<li><a href="#md:futurableracevalues-t-signal-abortsignal"><span>Futurable.race(values: <wbr/>T, signal?: <wbr/>Abort<wbr/>Signal)</span></a></li></ul></li>
+<li><a href="#md:futurableracevalues-t-signal-abortsignal"><span>Futurable.race(values: <wbr/>T, signal?: <wbr/>Abort<wbr/>Signal)</span></a></li></ul></li></ul></li>
+<li><a href="#md:todo"><span>To<wbr/>Do</span></a></li>
+<li>
+<ul>
 <li><a href="#md:license"><span>License</span></a></li></ul></li></ul></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="modules.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)"></path></g></svg><span>@ndriadev/futurable</span></a>
