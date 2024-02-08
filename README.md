@@ -40,6 +40,7 @@
 	- [Futurable.allSettled](#futurableallsettledvalues-t-signal-abortsignal)
 	- [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
 	- [Futurable.race](#futurableracevalues-t-signal-abortsignal)
+	- [Futurable.polling](#futurablepollingvalue--futurable--interval-signal-interval-number-signal-abortsignal)
 - [ToDo](#TODO)
 - [License](#License)
 
@@ -134,7 +135,7 @@ They are the following:
 - [Futurable.allSettled](#futurableallsettledvalues-t-signal-abortsignal)
 - [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
 - [Futurable.race](#futurableracevalues-t-signal-abortsignal)
-- [Futurable.polling](#futurable.pollingtvalue--futurablet--interval-signal-interval-number-signal-abortsignal)
+- [Futurable.polling](#futurablepollingvalue--futurable--interval-signal-interval-number-signal-abortsignal)
 
 ### constructor(executor: FuturableExecutor<T>, signal?: AbortSignal)
 Futurable is instantiable like a classic Promise.
