@@ -804,4 +804,29 @@ describe('Futurable', () => {
 		})
 		expect(data).toBeUndefined();
 	});
+	test("polling", async () => {
+		expect.assertions(1);
+		let data = 0;
+		setTimeout(() => {
+			f && f.cancel();
+		}, 4999);
+		const f = Futurable.polling(
+			() => new Futurable<void>(res => {
+				setTimeout(() => {
+					data++;
+					res();
+				},500)
+			}),
+			{
+				interval: 1000
+			}
+		);
+		f.catch(() => { data = 0 });
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		expect(data).toBe(4);
+	});
 })

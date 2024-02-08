@@ -563,4 +563,29 @@ export class Futurable<T> extends Promise<T> {
 
 		return f;
 	}
+
+	/**
+	 * Creates a polling service with cancellation support and possibility to handle error.
+	 */
+	static polling<T>(value: ()=> Futurable<T>, { interval, signal }:{interval: number, signal?: AbortSignal}): {cancel: () => void, catch: (onrejected:(reason: unknown)=>void)=>void } {
+		let f:Futurable<void>, internal: Futurable<void>, catched: (reason:unknown)=>void;
+		const id = setInterval(() => {
+			f && f.cancel();
+			f = new Futurable<void>((res, rej, utils) => {
+				utils.onCancel(() => {
+					internal && internal.cancel();
+				})
+				internal = value().then(()=>res()).catch(err => catched && catched(err))
+			}, signal);
+		}, interval);
+		return {
+			cancel: () => {
+				id && clearInterval(id);
+				f && f.cancel();
+			},
+			catch: onrejected => {
+				catched = onrejected;
+			}
+		};
+	}
 }

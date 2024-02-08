@@ -52,17 +52,30 @@ import { Futurable } from "./../index";
 // fh.then(console.log)
 // const f = new Futurable<boolean>((res) => res(true)).then(val => 1).then(onfulfilled)
 
-function getData(signal?: AbortSignal) {
-	return Futurable
-		.fetch("https://hub.dummyapis.com/delay?seconds=10", {signal})
-		.then(res => res.text())
-		.then(() => console.log("finish"))
-}
+// function getData(signal?: AbortSignal) {
+// 	return Futurable
+// 		.fetch("https://hub.dummyapis.com/delay?seconds=10", {signal})
+// 		.then(res => res.text())
+// 		.then(() => console.log("finish"))
+// }
 
-const f = Futurable.all([
-	getData()
-])
+// const f = Futurable.all([
+// 	getData()
+// ])
+
+// setTimeout(() => {
+// 	f.cancel();
+// }, 3000);
+
+let f: ReturnType<typeof Futurable<unknown>["polling"]>;
+function getData() {
+	f = Futurable
+		.polling(()=>Futurable.fetch("https://hub.dummyapis.com/delay?seconds=10")
+		.then(res => res.text())
+		.then(data => console.log(data)), {interval: 1000})
+}
+getData();
 
 setTimeout(() => {
 	f.cancel();
-}, 3000);
+}, 5000);
