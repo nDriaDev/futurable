@@ -2,9 +2,8 @@ import { resolve } from 'node:path'
 
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
-import EsLint from 'vite-plugin-linter'
 import tsConfigPaths from 'vite-tsconfig-paths'
-const { EsLinter, linterPlugin } = EsLint
+import { EsLinter, linterPlugin } from "vite-plugin-linter";
 
 // https://vitejs.dev/config/
 export default defineConfig((configEnv) => ({
