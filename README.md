@@ -134,6 +134,7 @@ They are the following:
 - [Futurable.allSettled](#futurableallsettledvalues-t-signal-abortsignal)
 - [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
 - [Futurable.race](#futurableracevalues-t-signal-abortsignal)
+- [Futurable.polling](#futurable.pollingtvalue--futurablet--interval-signal-interval-number-signal-abortsignal)
 
 ### constructor(executor: FuturableExecutor<T>, signal?: AbortSignal)
 Futurable is instantiable like a classic Promise.
@@ -587,6 +588,19 @@ const f = Futurable.race([
 f.cancel();
 ```
 
+### Futurable.polling<T>(value: ()=> Futurable<T>, { interval, signal }:{interval: number, signal?: AbortSignal})
+Creates a polling service with cancellation support and possibility to handle error.
+
+*Example*
+```javascript
+//...code
+const polling = Futurable.polling(() => Futurable.fetch(/*...*/)), {interval: 1000});
+polling.catch(err => console.error(err));
+
+//...code
+
+polling.cancel();
+```
 
 #  ToDo
 - Think about the possibility of making a static method that returns an object with the futurable, resolve, reject, utils properties inside to be used as done for usePromiser.
