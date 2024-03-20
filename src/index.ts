@@ -588,4 +588,26 @@ export class Futurable<T> extends Promise<T> {
 			}
 		};
 	}
+
+	/**
+	 * Creates an object with:
+	 * - _build_: function to create a Futurable.
+	 * - _resolve_: function to resolve the Futurable created.
+	 * - _reject_: function to reject the Futurable created.
+	 * - _utils_: object that reflects __utils__ object of Futurabled created.
+	 */
+	static builder<T>(signal?: AbortSignal): { resolve: null | FuturableResolve<T>, reject: null | FuturableReject, utils: null | FuturableUtils<T>, build: () => Futurable<T>} {
+		return {
+			resolve: null,
+			reject: null,
+			utils: null,
+			build() {
+				return new Futurable<T>((resolve, reject, utils) => {
+					this.resolve = resolve;
+					this.reject = reject;
+					this.utils = utils;
+				}, signal)
+			}
+		}
+	}
 }

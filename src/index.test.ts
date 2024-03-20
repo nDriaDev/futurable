@@ -829,4 +829,17 @@ describe('Futurable', () => {
 		jest.advanceTimersByTime(1000);
 		expect(data).toBe(4);
 	});
+	test('builder', async () => {
+		let data = 1;
+		const builder = Futurable.builder<number>();
+		setTimeout(() => {
+			builder.resolve && builder.resolve(3);
+		}, 2000);
+		builder.build().then(val => {
+			data = val;
+		}).then(() => {
+			expect(data).toBe(3);
+		});
+		jest.advanceTimersByTime(2000);
+	});
 })

@@ -41,6 +41,7 @@
 	- [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
 	- [Futurable.race](#futurableracevalues-t-signal-abortsignal)
 	- [Futurable.polling](#futurablepollingvalue--futurable--interval-signal-interval-number-signal-abortsignal)
+	- [Futurable.builder](#futurablebuildersignal-abortsignal)
 - [ToDo](#TODO)
 - [License](#License)
 
@@ -136,6 +137,7 @@ They are the following:
 - [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
 - [Futurable.race](#futurableracevalues-t-signal-abortsignal)
 - [Futurable.polling](#futurablepollingvalue--futurable--interval-signal-interval-number-signal-abortsignal)
+- [Futurable.builder](#futurablebuildersignal-abortsignal)
 
 ### constructor(executor: FuturableExecutor<T>, signal?: AbortSignal)
 Futurable is instantiable like a classic Promise.
@@ -603,8 +605,27 @@ polling.catch(err => console.error(err));
 polling.cancel();
 ```
 
+### Futurable.builder<T>(signal?: AbortSignal)
+Creates an object with:
+- _build_: function to create a Futurable.
+- _resolve_: function to resolve the Futurable created.
+- _reject_: function to reject the Futurable created.
+- _utils_: object that reflects __utils__ object of Futurabled created.
+
+*Example*
+```javascript
+//...code
+const future = Futurable.buider();
+
+//...code
+
+await future.build();
+
+//...code
+future.resolve("resolved");
+```
+
 #  ToDo
-- Think about the possibility of making a static method that returns an object with the futurable, resolve, reject, utils properties inside to be used as done for usePromiser.
 - Extends fetch api support to third library like axios.
 - Implement promise cache.
 
