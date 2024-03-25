@@ -611,11 +611,11 @@ Extension of static method _withResolvers_ with support of _cancel_ function and
 *Example*
 ```javascript
 //...code
-const {futurable, resolve, reject} = Futurable.withResolvers();
+const {promise, resolve, reject} = Futurable.withResolvers();
 
 //...code
 
-const result = await futurable;
+const result = await promise;
 
 //...code
 resolve("resolved");
