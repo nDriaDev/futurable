@@ -41,7 +41,7 @@
 	- [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
 	- [Futurable.race](#futurableracevalues-t-signal-abortsignal)
 	- [Futurable.polling](#futurablepollingvalue--futurable--interval-signal-interval-number-signal-abortsignal)
-	- [Futurable.builder](#futurablebuildersignal-abortsignal)
+	- [Futurable.withResolvers](#futurablewithresolverssignal-abortsignal)
 - [ToDo](#TODO)
 - [License](#License)
 
@@ -137,7 +137,7 @@ They are the following:
 - [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
 - [Futurable.race](#futurableracevalues-t-signal-abortsignal)
 - [Futurable.polling](#futurablepollingvalue--futurable--interval-signal-interval-number-signal-abortsignal)
-- [Futurable.builder](#futurablebuildersignal-abortsignal)
+- [Futurable.withResolvers](#futurablewithresolverssignal-abortsignal)
 
 ### constructor(executor: FuturableExecutor<T>, signal?: AbortSignal)
 Futurable is instantiable like a classic Promise.
@@ -359,7 +359,7 @@ async function op() {
 ```
 --->
 ### futurizable(promise: Promise | (val => Promise))
-Takes a promise and transforms it into a futurizable. Promise can be also a function that receives value from futurable chaining as parameter.
+Takes a promise and transforms it into a futurable. Promise can be also a function that receives value from futurable chaining as parameter.
 
 *Example*
 ```javascript
@@ -466,7 +466,7 @@ Futurable.futurizable({promise: /*promise to futurizable*/, signal: controller.s
 ```
 
 ### Futurable.all(values: T, signal?: AbortSignal)
-Extension of the static method all with cancellation support.
+Extension of the static method _all_ with cancellation support.
 
 *Example*
 ```javascript
@@ -498,7 +498,7 @@ f.cancel();
 ```
 
 ### Futurable.allSettled(values: T, signal?: AbortSignal)
-Extension of the static method allSettled with cancellation support.
+Extension of the static method _allSettled_ with cancellation support.
 
 *Example*
 ```javascript
@@ -530,7 +530,7 @@ f.cancel();
 ```
 
 ### Futurable.any(values: T, signal?: AbortSignal)
-Extension of the static method any with cancellation support.
+Extension of the static method _any_ with cancellation support.
 
 *Example*
 ```javascript
@@ -561,7 +561,7 @@ f.cancel();
 ```
 
 ### Futurable.race(values: T, signal?: AbortSignal)
-Extension of the static method race with cancellation support.
+Extension of the static method _race_ with cancellation support.
 
 *Example*
 ```javascript
@@ -605,24 +605,20 @@ polling.catch(err => console.error(err));
 polling.cancel();
 ```
 
-### Futurable.builder<T>(signal?: AbortSignal)
-Creates an object with:
-- _build_: function to create a Futurable.
-- _resolve_: function to resolve the Futurable created.
-- _reject_: function to reject the Futurable created.
-- _utils_: object that reflects __utils__ object of Futurabled created.
+### Futurable.withResolvers<T>(signal?: AbortSignal)
+Extension of static method _withResolvers_ with support of _cancel_ function and _utils_ object of Futurable.
 
 *Example*
 ```javascript
 //...code
-const future = Futurable.buider();
+const {futurable, resolve, reject} = Futurable.withResolvers();
 
 //...code
 
-await future.build();
+const result = await futurable;
 
 //...code
-future.resolve("resolved");
+resolve("resolved");
 ```
 
 #  ToDo

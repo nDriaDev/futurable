@@ -475,29 +475,6 @@ describe('Futurable', () => {
 		});
 		expect(data).toBeUndefined();
 	});
-	// test('promisify', async () => {
-	// 	let data = 1;
-	// 	await Futurable.delay({
-	// 		cb: () => data = 2,
-	// 		timer: 3000
-	// 	}).promisify();
-	// 	jest.advanceTimersByTime(3000);
-	// 	expect(data).toBe(2);
-	// });
-	// test('promisify with signal aborted', async () => {
-	// 	let resolver:(value: void | PromiseLike<void>)=>void, data = 1;
-	// 	const controller = new AbortController();
-	// 	setTimeout(() => {
-	// 		controller.abort();
-	// 		resolver();
-	// 	}, 1000)
-	// 	await new Promise<void>(async res => {
-	// 		resolver = res;
-	// 		jest.advanceTimersByTime(1000);
-	// 		await Futurable.delay(() => data = 2, { timer: 3000, signal: controller.signal }).promisify();
-	// 	})
-	// 	expect(data).toBe(1);
-	// });
 	test('futurizable utils', async () => {
 		const data = 1;
 		const newData = await new Futurable<number>((resolve, reject, utils) => {
@@ -533,6 +510,11 @@ describe('Futurable', () => {
 		data = await Futurable.resolve(3);
 		expect(data).toBe(3);
 	});
+	test('static resolve void', async () => {
+		let data:number|void = 1;
+		data = await Futurable.resolve();
+		expect(data).toBeUndefined();
+	});
 	test('static reject', async () => {
 		let data = 1;
 		data = await Futurable.reject(3).catch(val => val);
@@ -567,6 +549,18 @@ describe('Futurable', () => {
 		const resp = await Futurable.fetch('fake fake');
 		const data = await resp.json();
 		expect(data.id).toBe(0);
+	});
+	test("static fetch external signal", async () => {
+		(fetch as any).mockReturnValue(Promise.resolve({ json: () => Promise.resolve({ id: 0 }) }));
+		expect.assertions(1);
+		let data;
+		const controller = new AbortController();
+		const f = Futurable.fetch('fake fake', {signal: controller.signal});
+		f.onCancel(() => {
+			data = 4
+		});
+		controller.abort();
+		expect(data).toBe(4);
 	});
 	test("static fetch abort", async () => {
 		let resolver:(value:void | PromiseLike<void>)=>void;
@@ -829,13 +823,13 @@ describe('Futurable', () => {
 		jest.advanceTimersByTime(1000);
 		expect(data).toBe(4);
 	});
-	test('builder', async () => {
+	test('withResolvers', async () => {
 		let data = 1;
-		const builder = Futurable.builder<number>();
+		const {promise, resolve} = Futurable.withResolvers<number>();
 		setTimeout(() => {
-			builder.resolve && builder.resolve(3);
+			resolve && resolve(3);
 		}, 2000);
-		builder.build().then(val => {
+		promise.then(val => {
 			data = val;
 		}).then(() => {
 			expect(data).toBe(3);
