@@ -1,4 +1,13 @@
-<h1 align="center">Futurable</h1>
+<h1 align="center">
+  	<br>
+	<a href="https://ndriadev.github.io/futurable/">
+  		<img src="/Futurable.png" alt="logo">
+	</a>
+	<br>
+	Futurable
+	<br>
+</h1>
+
 <h3 align="center">Javascript's Promise and Fetch API with super powers!</h3>
 
 <div align="center">

@@ -1,0 +1,44 @@
+.title {
+	max-width: 60% !important;
+}
+
+#tsd-toolbar-links {
+	right: -1rem !important;
+}
+
+#tsd-search .field label {
+	right: -76px !important;
+}
+
+@media (max-width: 769px) {
+	.has-menu .col-sidebar {
+		display: flex;
+		justify-content: start;
+		flex-direction: column-reverse !important;
+	}
+}
+
+@media (min-width: 770px) and (max-width: 1399px) {
+	.col-sidebar {
+		display: flex;
+		justify-content: start;
+		flex-direction: column-reverse !important;
+	}
+	.site-menu {
+		margin-top: 0 !important;
+	}
+}
+
+.tsd-page-title {
+	display: none !important;
+}
+
+.tsd-panel>h1 {
+	margin-top: 0 !important;
+}
+
+a[href="https://github.com/nDriaDev/futurable"]:before {
+	content: url(/github.svg);
+	margin-right: 10px;
+	padding-top: 4px;
+}
