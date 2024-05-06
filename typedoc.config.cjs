@@ -5,7 +5,6 @@ module.exports = {
 	entryPoints: ["src/index.ts"],
 	hideGenerator: true,
 	commentStyle: "JSDoc",
-	cname: "futurable.ndria.dev",
 	customCss: "resources/css/style.css",
 	customTitle: `Futurable ${pkg.version}`,
 	customDescription: "Extension Javascript's Promise API with more functionalities",
