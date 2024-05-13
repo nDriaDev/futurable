@@ -4,6 +4,7 @@ const pkg = require('./package.json');
 module.exports = {
 	entryPoints: ["src/index.ts"],
 	hideGenerator: true,
+	cname: "futurable.ndria.dev",
 	commentStyle: "JSDoc",
 	customCss: "resources/css/style.css",
 	customTitle: `Futurable ${pkg.version}`,
