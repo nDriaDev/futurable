@@ -1,6 +1,6 @@
 <h1 align="center">
   	<br>
-	<a href="https://ndriadev.github.io/futurable/">
+	<a href="https://futurable.ndria.dev/">
   		<img src="/Futurable.png" alt="logo">
 	</a>
 	<br>
