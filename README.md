@@ -1,7 +1,7 @@
 <h1 align="center">
   	<br>
 	<a href="https://futurable.ndria.dev/">
-  		<img src="/Futurable.png" alt="logo">
+  		<img src="https://futurable.ndria.dev/Futurable.png" alt="logo">
 	</a>
 	<br>
 	Futurable
