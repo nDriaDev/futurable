@@ -1,0 +1,12 @@
+/* TEAM */
+Developer: Andrea Cosentino
+Contact: admin@ndria.dev
+Telegram: @ndria_dev
+Location: Italy
+website: www.ndria.dev
+
+
+/* SITE */
+Last update: 17/05/2024
+Standards: Javascript, Typescript
+Software: Extension Javascript's Promise API with more functionalities
