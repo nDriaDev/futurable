@@ -612,20 +612,26 @@ export class Futurable<T> extends Promise<T> {
 	}
 
 	/**
-	 * Creates a polling service with cancellation support and possibility to handle error.
-	 * @param {()=> Futurable<T>} value
-	 * @param {{interval: number, signal?: AbortSignal}} options
+	 * Creates a polling service with cancellation support and possibility to handle error. An optional param __immediate__ can be set _true_ if __fun__ must to be invoke immediatly.
+	 * @param {()=> Futurable<T>} fun
+	 * @param {{interval: number, signal?: AbortSignal, immediate?: boolean}} options
 	 * @returns {{cancel: () => void, catch: (onrejected:(reason: unknown)=>void)=>void }}
 	 */
-	static polling<T>(value: ()=> Futurable<T>, { interval, signal }:{interval: number, signal?: AbortSignal}): {cancel: () => void, catch: (onrejected:(reason: unknown)=>void)=>void } {
-		let f:Futurable<void>, internal: Futurable<void>, catched: (reason:unknown)=>void;
+	static polling<T>(fun: () => Futurable<T>, { interval, signal, immediate }: { interval: number, signal?: AbortSignal, immediate?: boolean }): { cancel: () => void, catch: (onrejected: (reason: unknown) => void) => void } {
+		let f: Futurable<void>, internal: Futurable<void>, catched: (reason: unknown) => void;
+		immediate && (f = new Futurable<void>((res, rej, utils) => {
+			utils.onCancel(() => {
+				internal && internal.cancel();
+			})
+			internal = fun().then(() => res()).catch(err => catched && catched(err))
+		}, signal));
 		const id = setInterval(() => {
 			f && f.cancel();
 			f = new Futurable<void>((res, rej, utils) => {
 				utils.onCancel(() => {
 					internal && internal.cancel();
 				})
-				internal = value().then(()=>res()).catch(err => catched && catched(err))
+				internal = fun().then(()=>res()).catch(err => catched && catched(err))
 			}, signal);
 		}, interval);
 		return {

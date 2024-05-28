@@ -812,7 +812,8 @@ describe('Futurable', () => {
 				},500)
 			}),
 			{
-				interval: 1000
+				interval: 1000,
+				immediate: true
 			}
 		);
 		f.catch(() => { data = 0 });
@@ -821,7 +822,7 @@ describe('Futurable', () => {
 		jest.advanceTimersByTime(1000);
 		jest.advanceTimersByTime(1000);
 		jest.advanceTimersByTime(1000);
-		expect(data).toBe(4);
+		expect(data).toBe(5);
 	});
 	test('withResolvers', async () => {
 		let data = 1;
