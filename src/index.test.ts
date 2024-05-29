@@ -798,7 +798,7 @@ describe('Futurable', () => {
 		})
 		expect(data).toBeUndefined();
 	});
-	test("polling", async () => {
+	test("polling with a function that returns a Futurable", async () => {
 		expect.assertions(1);
 		let data = 0;
 		setTimeout(() => {
@@ -809,8 +809,57 @@ describe('Futurable', () => {
 				setTimeout(() => {
 					data++;
 					res();
-				},500)
+				}, 500)
 			}),
+			{
+				interval: 1000,
+				immediate: true
+			}
+		);
+		f.catch(() => { data = 0 });
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		expect(data).toBe(5);
+	});
+	test("polling with a function that returns a Promise", async () => {
+		expect.assertions(1);
+		let data = 0;
+		setTimeout(() => {
+			f && f.cancel();
+		}, 4999);
+		const f = Futurable.polling(
+			() => new Promise<void>(res => {
+				setTimeout(() => {
+					data++;
+					res();
+				}, 500)
+			}),
+			{
+				interval: 1000,
+				immediate: true
+			}
+		);
+		f.catch(() => { data = 0 });
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		jest.advanceTimersByTime(1000);
+		expect(data).toBe(5);
+	});
+	test("polling with a function that returns void", async () => {
+		expect.assertions(1);
+		let data = 0;
+		setTimeout(() => {
+			f && f.cancel();
+		}, 4999);
+		const f = Futurable.polling(
+			() => {
+				data++;
+			},
 			{
 				interval: 1000,
 				immediate: true

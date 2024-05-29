@@ -617,21 +617,25 @@ export class Futurable<T> extends Promise<T> {
 	 * @param {{interval: number, signal?: AbortSignal, immediate?: boolean}} options
 	 * @returns {{cancel: () => void, catch: (onrejected:(reason: unknown)=>void)=>void }}
 	 */
-	static polling<T>(fun: () => Futurable<T>, { interval, signal, immediate }: { interval: number, signal?: AbortSignal, immediate?: boolean }): { cancel: () => void, catch: (onrejected: (reason: unknown) => void) => void } {
-		let f: Futurable<void>, internal: Futurable<void>, catched: (reason: unknown) => void;
+	static polling<T>(fun: () => Futurable<T>|Promise<T>|T, { interval, signal, immediate }: { interval: number, signal?: AbortSignal, immediate?: boolean }): { cancel: () => void, catch: (onrejected: (reason: unknown) => void) => void } {
+		let f: Futurable<void>, internal: Futurable<void>|Promise<void>, catched: (reason: unknown) => void;
 		immediate && (f = new Futurable<void>((res, rej, utils) => {
 			utils.onCancel(() => {
-				internal && internal.cancel();
+				internal && internal instanceof Futurable && internal.cancel();
 			})
-			internal = fun().then(() => res()).catch(err => catched && catched(err))
+			const temp = fun();
+			(temp instanceof Futurable || temp instanceof Promise) &&
+				(internal = temp.then(() => res()).catch(err => catched && catched(err)));
 		}, signal));
 		const id = setInterval(() => {
 			f && f.cancel();
 			f = new Futurable<void>((res, rej, utils) => {
 				utils.onCancel(() => {
-					internal && internal.cancel();
+					internal && internal instanceof Futurable && internal.cancel();
 				})
-				internal = fun().then(()=>res()).catch(err => catched && catched(err))
+				const temp = fun();
+				(temp instanceof Futurable || temp instanceof Promise) &&
+					(internal = temp.then(() => res()).catch(err => catched && catched(err)));
 			}, signal);
 		}, interval);
 		return {
