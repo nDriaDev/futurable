@@ -49,7 +49,7 @@
 	- [Futurable.allSettled](#futurableallsettledvalues-t-signal-abortsignal)
 	- [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
 	- [Futurable.race](#futurableracevalues-t-signal-abortsignal)
-	- [Futurable.polling](#futurablepollingvalue--futurable--interval-signal-interval-number-signal-abortsignal)
+	- [Futurable.polling](#futurablepollingvalue--futurable--interval-signal-immediate-interval-number-signal-abortsignal-immediate-boolean)
 	- [Futurable.withResolvers](#futurablewithresolverssignal-abortsignal)
 - [ToDo](#TODO)
 - [License](#License)
@@ -68,7 +68,6 @@ Often it happens where to develop a feature using promises that covers a particu
 npm  install  futurable  # or yarn add futurable or pnpm add futurable
 
 ```
-
 
 #  Usage
 The library supports both ESM and CJS formats, so it can be used as follows:
@@ -124,6 +123,7 @@ export default function Component() {
 }
 ```
 
+
 #  API
 The methods implemented, excluding those that are by nature static can be used:
 - During the construction of the futurable using the ***new*** operator;
@@ -145,7 +145,7 @@ They are the following:
 - [Futurable.allSettled](#futurableallsettledvalues-t-signal-abortsignal)
 - [Futurable.any](#futurableanyvalues-t-signal-abortsignal)
 - [Futurable.race](#futurableracevalues-t-signal-abortsignal)
-- [Futurable.polling](#futurablepollingvalue--futurable--interval-signal-interval-number-signal-abortsignal)
+- [Futurable.polling](#futurablepollingvalue--futurable--interval-signal-immediate-interval-number-signal-abortsignal-immediate-boolean)
 - [Futurable.withResolvers](#futurablewithresolverssignal-abortsignal)
 
 ### constructor(executor: FuturableExecutor<T>, signal?: AbortSignal)
@@ -600,8 +600,8 @@ const f = Futurable.race([
 f.cancel();
 ```
 
-### Futurable.polling<T>(value: ()=> Futurable<T>, { interval, signal }:{interval: number, signal?: AbortSignal})
-Creates a polling service with cancellation support and possibility to handle error.
+### Futurable.polling<T>(value: ()=> Futurable<T>, { interval, signal, immediate }:{interval: number, signal?: AbortSignal, immediate?: boolean})
+Creates a polling service with cancellation support and possibility to handle error. An optional param __immediate__ can be set _true_ if __fun__ must to be invoke immediatly.
 
 *Example*
 ```javascript
@@ -629,6 +629,7 @@ const result = await promise;
 //...code
 resolve("resolved");
 ```
+
 
 #  ToDo
 - Extends fetch api support to third library like axios.
