@@ -331,12 +331,14 @@ export class Futurable<T> extends Promise<T> {
 			const urlFetch = typeof url === "function" ? url(val) : url,
 				optsFetch = { ...(typeof opts === "function" ? opts(val) : opts), signal: this.internalSignal };
 
-			fetch(urlFetch, optsFetch).then(val => resolve(val)).catch(err => {
-				if (err.name === "AbortError") {
-					return;
-				} else {
-					reject(err);
-				}
+			fetch(urlFetch, optsFetch)
+				.then(val => resolve(val))
+				.catch(err => {
+					if (err.name === "AbortError") {
+						return;
+					} else {
+						reject(err);
+					}
 			});
 		});
 		return p;
@@ -461,7 +463,7 @@ export class Futurable<T> extends Promise<T> {
 		const signal = opts?.signal || undefined;
 		opts?.signal && delete opts.signal;
 		return new Futurable((res, rej, utils) => {
-			utils.fetch(url, opts).then(res);
+			utils.fetch(url, opts).then(res).catch(rej);
 		}, signal)
 	}
 
