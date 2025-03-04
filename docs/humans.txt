@@ -7,6 +7,6 @@ website: www.ndria.dev
 
 
 /* SITE */
-Last update: 27/06/2024
+Last update: 17/05/2024
 Standards: Javascript, Typescript
 Software: Extension Javascript's Promise API with more functionalities
