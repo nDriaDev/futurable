@@ -2,7 +2,7 @@
 	"name": "@ndriadev/futurable",
 	"description": "JavaScript's Promise and Fetch APIs with superpowers!",
 	"private": false,
-	"version": "2.3.4",
+	"version": "2.3.5",
 	"type": "module",
 	"files": [
 		"dist/",

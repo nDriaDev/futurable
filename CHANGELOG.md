@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.3.5](https://github.com/nDriaDev/vite-plugin-universal-api/releases/tag/v2.3.5) - 2026-02-06
+
+- Initial release
+
 ## [2.3.4](https://github.com/nDriaDev/vite-plugin-universal-api/releases/tag/v2.3.4) - 2026-02-06
 
 ### Bug Fixes
