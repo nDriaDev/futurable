@@ -1,9 +1,18 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [2.3.4](https://github.com/nDriaDev/vite-plugin-universal-api/releases/tag/v2.3.4) - 2026-02-06
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Bug Fixes
+
+- gitignore ([11759fe](https://github.com/nDriaDev/vite-plugin-universal-api/commit/11759fe))
+- [FIX] docs ([4b80d05](https://github.com/nDriaDev/vite-plugin-universal-api/commit/4b80d05))
+
+### Chores
+
+- update dependencies ([f90aadb](https://github.com/nDriaDev/vite-plugin-universal-api/commit/f90aadb))
+- update dependencies ([16e1592](https://github.com/nDriaDev/vite-plugin-universal-api/commit/16e1592))
+- update dependencies ([cd4df57](https://github.com/nDriaDev/vite-plugin-universal-api/commit/cd4df57))
+- refactor library ([7623ed9](https://github.com/nDriaDev/vite-plugin-universal-api/commit/7623ed9))
 
 ## [Unreleased]
 
