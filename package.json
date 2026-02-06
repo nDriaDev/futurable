@@ -24,6 +24,7 @@
 		"dev": "unbuild --stub",
 		"test": "NODE_OPTIONS=--experimental-vm-modules jest",
 		"test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+		"test:run": "NODE_OPTIONS=--experimental-vm-modules jest",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"typecheck": "tsc --noEmit",
