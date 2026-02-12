@@ -1,0 +1,23 @@
+{
+  "name": "futurable-tests",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Test suite for Futurable and FuturableTask classes",
+  "scripts": {
+    "check": "node check-setup.mjs",
+    "test": "node --import tsx --test tests/**/*.test*.ts",
+    "test:coverage": "node --import tsx --test --experimental-test-coverage tests/**/*.test*.ts",
+    "test:futurable": "node --import tsx --test tests/Futurable.test.ts",
+    "test:task": "node --import tsx --test tests/FuturableTask.test.ts tests/FuturableTask.test2.ts",
+    "build": "tsc",
+    "build:test": "tsc -p tsconfig.test.json"
+  },
+  "keywords": ["async", "promise", "future", "task", "cancellable"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0"
+  }
+}
