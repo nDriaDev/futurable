@@ -685,7 +685,7 @@ export class Futurable<T> extends Promise<T> {
 			reject = rej;
 			utils = utls;
 		}, signal);
-		const cancel = promise.cancel;
+		const cancel = promise.cancel.bind(promise);
 		return {
 			resolve: resolve!,
 			reject: reject!,
