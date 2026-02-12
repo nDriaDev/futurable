@@ -619,34 +619,54 @@ export class Futurable<T> extends Promise<T> {
 	 * @param {{interval: number, signal?: AbortSignal, immediate?: boolean}} options
 	 * @returns {{cancel: () => void, catch: (onrejected:(reason: unknown)=>void)=>void }}
 	 */
-	static polling<T>(fun: () => Futurable<T>|Promise<T>|T, { interval, signal, immediate }: { interval: number, signal?: AbortSignal, immediate?: boolean }): { cancel: () => void, catch: (onrejected: (reason: unknown) => void) => void } {
-		let f: Futurable<void>, internal: Futurable<void>|Promise<void>, catched: (reason: unknown) => void;
-		immediate && (f = new Futurable<void>((res, rej, utils) => {
-			utils.onCancel(() => {
-				internal && internal instanceof Futurable && internal.cancel();
-			})
-			const temp = fun();
-			(temp instanceof Futurable || temp instanceof Promise) &&
-				(internal = temp.then(() => res()).catch(err => catched && catched(err)));
-		}, signal));
-		const id = setInterval(() => {
+	static polling<T>(fun: () => Futurable<T> | Promise<T> | T, { interval, signal, immediate }: { interval: number, signal?: AbortSignal, immediate?: boolean }): FuturablePollingController {
+		let f: Futurable<void>;
+		let internal: Futurable<void> | Promise<void>;
+		const pendingErrors: unknown[] = [];
+
+		let errorHandler: (reason: unknown) => void = (err) => {
+			pendingErrors.push(err);
+		};
+
+		const executePoll = (): void => {
 			f && f.cancel();
 			f = new Futurable<void>((res, rej, utils) => {
 				utils.onCancel(() => {
 					internal && internal instanceof Futurable && internal.cancel();
-				})
+				});
+				try {
 				const temp = fun();
-				(temp instanceof Futurable || temp instanceof Promise) &&
-					(internal = temp.then(() => res()).catch(err => catched && catched(err)));
+					if (temp instanceof Futurable || temp instanceof Promise) {
+						internal = temp
+							.then(() => res())
+							.catch(err => {
+								errorHandler(err);
+							});
+					} else {
+						res();
+					}
+				} catch (err) {
+					errorHandler(err);
+				}
 			}, signal);
-		}, interval);
+		};
+
+		if (immediate) {
+			executePoll();
+		}
+		const id = setInterval(executePoll, interval);
 		return {
 			cancel: () => {
 				id && clearInterval(id);
 				f && f.cancel();
+				internal && internal instanceof Futurable && internal.cancel();
 			},
-			catch: onrejected => {
-				catched = onrejected;
+			catch: (onrejected) => {
+				errorHandler = onrejected;
+				if (pendingErrors.length > 0) {
+					pendingErrors.forEach(err => onrejected(err));
+					pendingErrors.length = 0;
+				}
 			}
 		};
 	}
