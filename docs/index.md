@@ -62,7 +62,7 @@ request.cancel();
 JavaScript's native Promise API is powerful but lacks crucial features for modern applications:
 
 - ❌ No way to cancel pending promises
-- ❌ No built-in delay or sleep functionality  
+- ❌ No built-in delay or sleep functionality
 - ❌ Fetch API requires complex AbortController setup
 - ❌ No polling mechanism out of the box
 
@@ -95,4 +95,4 @@ pnpm add @ndriadev/futurable
 
 ## License
 
-[MIT](https://github.com/nDriaDev/futurable/blob/main/LICENSE) © [Andrea Cosentino](https://github.com/nDriaDev)
+[MIT](https://github.com/nDriaDev/futurable/blob/main/LICENSE) © [nDriaDev](https://github.com/nDriaDev)
