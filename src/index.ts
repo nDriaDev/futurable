@@ -87,25 +87,26 @@ export class Futurable<T> extends Promise<T> {
 	private idsTimeout;
 
 	constructor(executor: FuturableExecutor<T>, signal?: AbortSignal) {
-		const controller: AbortController | null = signal ? null : new AbortController();
-		const sign = signal || controller!.signal;
+		const controller: AbortController = new AbortController();
+		if (signal) {
+			if (signal.aborted) {
+				controller.abort();
+			} else {
+				signal.addEventListener('abort', () => controller.abort(), { once: true });
+			}
+		}
+		const sign = controller!.signal;
 		const idsTimeout: ReturnType<typeof setTimeout>[] = [];
 
-		const abortTimeout = () => {
-			for (const timeout of idsTimeout) {
-				clearTimeout(timeout);
-			}
-		};
-
-		let abort: () => void;
+		let abortCb: (() => void)[] = [];
 
 		const onCancel = (cb: () => void): void => {
-			abort = cb;
+			abortCb.push(cb);
 		};
 
 		const utils: FuturableUtils<T> = {
 			signal: sign,
-			cancel: (): void => this.controller?.abort(),
+			cancel: (): void => controller.abort(),
 			onCancel,
 			delay: (cb, timer) => {
 				return new Futurable(res => {
@@ -143,29 +144,32 @@ export class Futurable<T> extends Promise<T> {
 
 		const p = new Promise<T>((resolve, reject) => {
 			if (!sign.aborted) {
-				const func: (() => void) = typeof sign.onabort === "function" ? sign.onabort as () => void : () => { };
-				sign.onabort = () => {
-					func();
-					abortTimeout();
+				const handleAbort = () => {
+					this.clearTimeout();
 					if (status === FUTURABLE_STATUS.PENDING) {
-						abort && abort();
+						abortCb.forEach(cb => cb());
 					}
-					return;
+					abortCb = [];
+				}
+				const cleanup = () => {
+					sign.removeEventListener('abort', handleAbort);
 				};
+				sign.addEventListener('abort', handleAbort, { once: true });
 
 				const res: FuturableResolve<T> = (val) => {
 					status = FUTURABLE_STATUS.FULFILLED;
+					cleanup();
 					resolve(val as T | PromiseLike<T>);
 				};
-
 				const rej: FuturableReject = (reason) => {
 					status = FUTURABLE_STATUS.REJECTED;
+					cleanup();
 					reject(reason);
 				};
 
 				executor(res, rej, utils);
 			} else {
-				abortTimeout();
+				this.clearTimeout();
 				return;
 			}
 		});
@@ -280,7 +284,7 @@ export class Futurable<T> extends Promise<T> {
 	 * Cancel the futurable if it is to be executed or if it is still executing.
 	 */
 	cancel(): void {
-		!this.internalSignal?.aborted && this.controller?.abort();
+		!this.internalSignal?.aborted && this.controller.abort();
 	}
 
 	/**
