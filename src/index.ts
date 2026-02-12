@@ -197,6 +197,7 @@ export class Futurable<T> extends Promise<T> {
 		for (const timeout of this.idsTimeout) {
 			clearTimeout(timeout);
 		}
+		this.idsTimeout.length = 0;
 	}
 
 	/**
@@ -483,15 +484,15 @@ export class Futurable<T> extends Promise<T> {
 	private static handleValues<T extends readonly unknown[] | []>(values: T, signal?: AbortSignal): Futurable<T>[] {
 		const array: Futurable<T>[] = [];
 
-		for (const i in values) {
-			if ((values[i] instanceof Futurable)) {
-				array.push(values[i] as Futurable<{ -readonly [P in keyof T]: T[P] }>);
+		for (const value of values) {
+			if ((value instanceof Futurable)) {
+				array.push(value as Futurable<{ -readonly [P in keyof T]: T[P] }>);
 			}
-			else if ((values[i] instanceof Promise)) {
+			else if ((value instanceof Promise)) {
 				array.push(
 					new Futurable<{ - readonly [P in keyof T]: T[P] }>(
 						(res, rej) => {
-							(values[i] as Promise<{ -readonly [P in keyof T]: T[P] }>)
+							(value as Promise<{ -readonly [P in keyof T]: T[P] }>)
 								.then((val) => res(val))
 								.catch(rej);
 						},
