@@ -1,4 +1,4 @@
-import { Futurable, FuturableExecutor, FuturableUtils } from ".";
+import { Futurable, FuturableExecutor, FuturableUtils } from "./Futurable.js";
 
 /**
  * Configuration options for memoization behavior.
