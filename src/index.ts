@@ -1,4 +1,15 @@
 /**
+ * Result type for safe operations that may succeed or fail.
+ * Provides a discriminated union for type-safe error handling without try-catch.
+ *
+ * @template T - The type of the success value
+ * @template E - The type of the error (defaults to Error)
+ */
+export type SafeResult<T, E = Error> =
+	| { success: true; data: T; error: null }
+	| { success: false; data: null; error: E };
+
+/**
 * A thenable-like interface that represents a value that may be available now, in the future, or never.
 * Compatible with both Promises and Futurables, allowing for flexible composition.
 *
@@ -588,6 +599,56 @@ export class Futurable<T> extends Promise<T> {
 	}
 
 	/**
+	 * Wraps the Futurable in a safe execution context that never throws.
+	 * Returns a result object containing either the resolved value or the error,
+	 * eliminating the need for try-catch blocks or .catch() handlers.
+	 *
+	 * This method is particularly useful in async/await contexts where you want
+	 * to handle errors explicitly without wrapping code in try-catch blocks.
+	 *
+	 * @template TError - The type of the error (defaults to unknown)
+	 * @returns A Futurable that resolves to a SafeResult containing either data or error
+	 *
+	 * @example
+	 * ```typescript
+	 * // Instead of try-catch:
+	 * const result = await Futurable.fetch('/api/data')
+	 *   .then(r => r.json())
+	 *   .safe();
+	 *
+	 * if (result.success) {
+	 *   console.log('Data:', result.data);
+	 * } else {
+	 *   console.error('Error:', result.error);
+	 * }
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // Chaining multiple operations safely:
+	 * const result = await Futurable.resolve(5)
+	 *   .delay(val => val * 2, 1000)
+	 *   .fetch(val => `/api/item/${val}`)
+	 *   .futurizable(r => r.json())
+	 *   .safe();
+	 *
+	 * if (result.success) {
+	 *   // TypeScript knows result.data is the JSON response
+	 *   processData(result.data);
+	 * } else {
+	 *   // TypeScript knows result.error exists
+	 *   logError(result.error);
+	 * }
+	 * ```
+	 */
+	safe<TError = unknown>(): Futurable<SafeResult<T, TError>> {
+		return this.then(
+			(value) => ({ success: true as const, data: value, error: null }),
+			(reason) => ({ success: false as const, data: null, error: reason as TError })
+		);
+	}
+
+	/**
 	* Creates a new resolved Futurable without a value (resolves to void).
 	*
 	* @returns A Futurable that immediately resolves to void
@@ -1056,5 +1117,89 @@ export class Futurable<T> extends Promise<T> {
 			cancel,
 			promise
 		}
+	}
+
+	/**
+	 * Creates a Futurable that wraps an executor in a safe execution context.
+	 * The resulting Futurable never rejects - instead, it resolves with a result
+	 * object containing either the success value or the error.
+	 *
+	 * This is useful when you want to create a Futurable that handles its own errors
+	 * internally and always resolves with a discriminated result type.
+	 *
+	 * @template T - The type of the success value
+	 * @template E - The type of the error (defaults to unknown)
+	 * @param executor - The Futurable executor function
+	 * @param signal - Optional AbortSignal for cancellation coordination
+	 * @returns A Futurable that always resolves to a SafeResult
+	 *
+	 * @example
+	 * ```typescript
+	 * const result = await Futurable.safe<number>(
+	 *   (resolve, reject, { fetch }) => {
+	 *     fetch('/api/data')
+	 *       .then(r => r.json())
+	 *       .then(data => resolve(data.value))
+	 *       .catch(reject);
+	 *   }
+	 * );
+	 *
+	 * if (result.success) {
+	 *   console.log('Value:', result.data);
+	 * } else {
+	 *   console.error('Failed:', result.error);
+	 * }
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // With custom error type:
+	 * interface ApiError {
+	 *   code: string;
+	 *   message: string;
+	 * }
+	 *
+	 * const result = await Futurable.safe<User, ApiError>(
+	 *   (resolve, reject, { fetch }) => {
+	 *     fetch('/api/user')
+	 *       .then(r => r.ok ? r.json() : reject({ code: 'HTTP_ERROR', message: r.statusText }))
+	 *       .then(resolve)
+	 *       .catch(err => reject({ code: 'NETWORK_ERROR', message: err.message }));
+	 *   }
+	 * );
+	 *
+	 * if (!result.success) {
+	 *   switch (result.error.code) {
+	 *     case 'HTTP_ERROR':
+	 *       // Handle HTTP errors
+	 *       break;
+	 *     case 'NETWORK_ERROR':
+	 *       // Handle network errors
+	 *       break;
+	 *   }
+	 * }
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // Combining with cancellation:
+	 * const controller = new AbortController();
+	 *
+	 * const result = await Futurable.safe<string>(
+	 *   (resolve, reject, { signal, fetch }) => {
+	 *     fetch('/api/slow-endpoint')
+	 *       .then(r => r.text())
+	 *       .then(resolve)
+	 *       .catch(reject);
+	 *   },
+	 *   controller.signal
+	 * );
+	 *
+	 * // Cancel after 5 seconds
+	 * setTimeout(() => controller.abort(), 5000);
+	 * ```
+	 */
+	static safe<T, E = unknown>(executor: FuturableExecutor<T>, signal?: AbortSignal): Futurable<SafeResult<T, E>> {
+		return new Futurable(executor, signal).safe<E>();
 	}
 }
