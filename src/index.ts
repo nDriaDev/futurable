@@ -199,6 +199,9 @@ export class Futurable<T> extends Promise<T> {
 
 	constructor(executor: FuturableExecutor<T>, signal?: AbortSignal) {
 		const controller: AbortController = new AbortController();
+		const sign = controller!.signal;
+		const idsTimeout: ReturnType<typeof setTimeout>[] = [];
+
 		if (signal) {
 			if (signal.aborted) {
 				controller.abort();
@@ -206,14 +209,20 @@ export class Futurable<T> extends Promise<T> {
 				signal.addEventListener('abort', () => controller.abort(), { once: true });
 			}
 		}
-		const sign = controller!.signal;
-		const idsTimeout: ReturnType<typeof setTimeout>[] = [];
 
 		let abortCb: (() => void)[] = [];
+		let status = FUTURABLE_STATUS.PENDING;
 
 		const onCancel = (cb: () => void): void => {
 			abortCb.push(cb);
 		};
+
+		const clearTimeouts = () => {
+			for (const timeout of idsTimeout) {
+				clearTimeout(timeout);
+			}
+			idsTimeout.length = 0;
+		}
 
 		const utils: FuturableUtils<T> = {
 			signal: sign,
@@ -251,12 +260,10 @@ export class Futurable<T> extends Promise<T> {
 			}
 		};
 
-		let status = FUTURABLE_STATUS.PENDING;
-
 		const p = new Promise<T>((resolve, reject) => {
 			if (!sign.aborted) {
 				const handleAbort = () => {
-					this.clearTimeout();
+					clearTimeouts();
 					if (status === FUTURABLE_STATUS.PENDING) {
 						abortCb.forEach(cb => cb());
 					}
@@ -280,13 +287,15 @@ export class Futurable<T> extends Promise<T> {
 
 				executor(res, rej, utils);
 			} else {
-				this.clearTimeout();
+				clearTimeouts();
 				return;
 			}
 		});
+
 		super((resolve, reject) => {
 			p.then(val => resolve(val)).catch(reject);
 		});
+
 		this.controller = controller;
 		this.internalSignal = sign;
 		this.idsTimeout = idsTimeout;
