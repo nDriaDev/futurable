@@ -174,4 +174,4 @@ const result: string = await futurable;
 
 - 📚 Check the [API documentation](/api/constructor)
 - 💬 Open an issue on [GitHub](https://github.com/nDriaDev/futurable/issues)
-- 📧 Contact the author at [andreacosentino.work@gmail.com](mailto:andreacosentino.work@gmail.com)
+- 📧 Contact the author at [info@ndria.dev](mailto:info@ndria.dev)
