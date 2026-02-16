@@ -207,6 +207,211 @@ results.cancel();
 
 ---
 
+## 🎯 FuturableTask: Lazy Computation for Advanced Workflows
+
+While `Futurable` extends Promise for eager execution, **`FuturableTask`** provides lazy computation with powerful functional composition capabilities. Think of it as a blueprint for async operations that only execute when you explicitly run them.
+
+### Why FuturableTask?
+
+- ⏱️ **Lazy Execution** - Define operations without executing them
+- 🔄 **Reusable** - Run the same task multiple times independently
+- 🧩 **Composable** - Chain transformations before execution
+- 🎛️ **Concurrency Control** - Built-in rate limiting and debouncing
+- 💾 **Memoization** - Cache results for expensive operations
+- 🔁 **Advanced Patterns** - Retry, timeout, fallback, and more
+
+### Quick Example
+
+```typescript
+import { FuturableTask } from '@ndriadev/futurable';
+
+// Define a task (not executed yet!)
+const fetchUser = FuturableTask
+  .of(() => fetch('/api/user'))
+  .map(res => res.json())
+  .retry(3)              // Retry on failure
+  .timeout(5000)         // 5 second timeout
+  .memoize();            // Cache the result
+
+// Execute when needed
+const user = await fetchUser.run();
+
+// Execute again - uses cached result
+const sameUser = await fetchUser.run();
+```
+
+### Key Features
+
+#### Lazy Evaluation
+```typescript
+// Creating a task doesn't execute it
+const task = FuturableTask.of(() => {
+  console.log('Executing!');
+  return expensiveOperation();
+});
+// Nothing logged yet
+
+// Execute when ready
+const result = await task.run(); // Now it executes
+```
+
+#### Functional Composition
+```typescript
+const pipeline = FuturableTask
+  .of(() => fetch('/api/data'))
+  .map(res => res.json())
+  .filter(data => data.active)
+  .map(data => processData(data))
+  .retry(3)
+  .timeout(10000);
+
+// All transformations applied during execution
+const result = await pipeline.run();
+```
+
+#### Concurrency Control
+```typescript
+// Limit concurrent executions
+const limiter = FuturableTask.createLimiter(2, {
+  onActive: (task) => console.log('Task started'),
+  onCompleted: (result) => console.log('Task done:', result)
+});
+
+const tasks = urls.map(url =>
+  limiter(FuturableTask.fetch(url))
+);
+
+// Only 2 tasks run concurrently
+await FuturableTask.parallel(tasks).run();
+```
+
+#### Advanced Error Handling
+```typescript
+const task = FuturableTask
+  .of(() => riskyOperation())
+  .retry(3, { delay: 1000 })        // Retry with backoff
+  .timeout(5000)                     // Timeout protection
+  .orElse(() => FuturableTask.resolve(fallbackValue))  // Fallback
+  .fallbackTo(error => {                // Error fallbackToy
+    console.error('Failed:', error);
+    return defaultValue;
+  });
+
+const result = await task.run();
+```
+
+#### Debouncing & Throttling
+```typescript
+// Debounce expensive operations
+const searchTask = FuturableTask
+  .of((query) => searchAPI(query))
+  .debounce(300);  // Wait 300ms after last call
+
+// Multiple rapid calls
+searchTask.run('a');
+searchTask.run('ab');
+searchTask.run('abc');  // Only this executes
+```
+
+#### Sequential & Parallel Execution
+```typescript
+// Execute tasks in sequence
+const sequential = FuturableTask.sequence([
+  FuturableTask.fetch('/api/step1'),
+  FuturableTask.fetch('/api/step2'),
+  FuturableTask.fetch('/api/step3')
+]);
+
+// Execute tasks in parallel
+const parallel = FuturableTask.parallel([
+  FuturableTask.fetch('/api/users'),
+  FuturableTask.fetch('/api/posts'),
+  FuturableTask.fetch('/api/comments')
+]);
+
+const results = await parallel.run();
+```
+
+### Common Patterns
+
+#### Retry with Exponential Backoff
+```typescript
+const resilientTask = FuturableTask
+  .of(() => unreliableAPI())
+  .retry(5, {
+    delay: 1000,
+    backoff: 2  // 1s, 2s, 4s, 8s, 16s
+  });
+```
+
+#### Polling Until Condition
+```typescript
+const pollUntilReady = FuturableTask
+  .until(
+    async () => await checkStatus() === 'ready',
+    FuturableTask.of(() => fetch('/api/status')).delay(1000)
+  );
+
+await pollUntilReady.run();
+```
+
+#### Batch Processing with Limits
+```typescript
+const limiter = FuturableTask.createLimiter(5);
+
+const processAllFiles = FuturableTask.traverse(
+  filePaths,
+  path => limiter(FuturableTask.of(() => processFile(path)))
+);
+
+await processAllFiles.run();
+```
+
+#### Race with Timeout
+```typescript
+const quickestResult = FuturableTask.race([
+  FuturableTask.fetch('/api/fast'),
+  FuturableTask.fetch('/api/slow'),
+  FuturableTask.sleep(3000).map(() => 'timeout')
+]);
+
+const result = await quickestResult.run();
+```
+
+### API Methods
+
+| Method | Description |
+|--------|-------------|
+| `of()` | Create a task from a function |
+| `run()` | Execute the task |
+| `map()` | Transform the result |
+| `flatMap()` | Transform and flatten |
+| `filter()` | Conditionally succeed |
+| `retry()` | Retry on failure |
+| `timeout()` | Add timeout protection |
+| `delay()` | Delay execution |
+| `debounce()` | Debounce execution |
+| `memoize()` | Cache results |
+| `orElse()` | Fallback task |
+| `tap()` | Side effects |
+| `finally()` | Cleanup logic |
+
+### Static Combinators
+
+| Method | Description |
+|--------|-------------|
+| `sequence()` | Execute tasks sequentially |
+| `parallel()` | Execute tasks in parallel |
+| `race()` | First task to complete |
+| `all()` | All tasks must succeed |
+| `allSettled()` | Wait for all to finish |
+| `traverse()` | Map and execute sequentially |
+| `whilst()` | Loop while condition |
+| `until()` | Loop until condition |
+| `times()` | Repeat n times |
+
+---
+
 ## 📚 API Reference
 
 For complete API documentation, visit [futurable.ndria.dev](https://futurable.ndria.dev/)

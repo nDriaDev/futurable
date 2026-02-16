@@ -56,7 +56,7 @@ For quick prototyping or browser-only projects, you can use Futurable via CDN:
 ```html
 <script type="module">
   import { Futurable } from 'https://esm.sh/@ndriadev/futurable';
-  
+
   const request = Futurable.fetch('https://api.example.com/data');
 </script>
 ```
@@ -67,7 +67,7 @@ For quick prototyping or browser-only projects, you can use Futurable via CDN:
 <script src="https://unpkg.com/@ndriadev/futurable"></script>
 <script>
   const { Futurable } = window.Futurable;
-  
+
   const request = Futurable.fetch('https://api.example.com/data');
 </script>
 ```
@@ -224,4 +224,4 @@ If you encounter issues:
 - 📖 Check the [documentation](https://futurable.ndria.dev)
 - 🐛 [Report a bug](https://github.com/nDriaDev/futurable/issues/new)
 - 💬 [Start a discussion](https://github.com/nDriaDev/futurable/discussions)
-- 📧 Email: [andreacosentino.work@gmail.com](mailto:andreacosentino.work@gmail.com)
+- 📧 Email: [info@ndria.dev](mailto:info@ndria.dev)

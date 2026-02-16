@@ -784,7 +784,6 @@ export class FuturableTask<T> {
 	 *
 	 * @example
 	 * ```typescript
-	 * // Chaining tapError with recovery
 	 * const result = await FuturableTask.of(() => mayFail())
 	 *   .tapError(err => analytics.trackError(err))
 	 *   .orElse(err => FuturableTask.resolve(defaultValue))
@@ -815,9 +814,9 @@ export class FuturableTask<T> {
 	 * and must return a new FuturableTask to execute instead.
 	 *
 	 * The fallback task can return a different type, allowing for type transformations
-	 * during error recovery.
+	 * during error fallbackToy.
 	 *
-	 * @template U - The type of the recovery value
+	 * @template U - The type of the fallbackToy value
 	 * @param fallbackTask - Function that receives the error and returns a FuturableTask
 	 * @returns A new FuturableTask with error handling
 	 *
