@@ -1,8 +1,4 @@
 {
-	"ts-node": {
-		"esm": true,
-		"experimentalSpecifierResolution": "node"
-	},
 	"compilerOptions": {
 		"target": "ESNext",
 		"useDefineForClassFields": true,
@@ -25,22 +21,8 @@
 		"esModuleInterop": true,
 		"declarationMap": true,
 		"baseUrl": ".",
-		"paths": {
-			"futurable": [
-				"src/index.ts"
-			]
-		},
-		"typeRoots": [
-			"node_modules/@types",
-			"src/index.ts"
-		]
 	},
 	"include": [
 		"src"
-	],
-	"references": [
-		{
-			"path": "./tsconfig.node.json"
-		}
 	]
 }
