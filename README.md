@@ -5,7 +5,7 @@
   </a>
   <br>
   <h1>Futurable</h1>
-  <p><strong>JavaScript's Promise and Fetch APIs with superpowers! 🚀</strong></p>
+  <p><strong>The async library JavaScript was missing 🚀</strong></p>
 
   [![npm version](https://img.shields.io/npm/v/%40ndriadev/futurable?color=orange&style=for-the-badge)](https://www.npmjs.org/package/%40ndriadev/futurable)
   ![npm bundle size](https://img.shields.io/bundlephobia/min/@ndriadev/futurable?color=yellow&label=SIZE&style=for-the-badge)
@@ -20,103 +20,268 @@
 </div>
 
 ---
-## 📋 Table of Contents
 
- - [Documentation](https://futurable.ndria.dev/)
- - [About](#-about)
- - [Quick Start](#-quick-start)
- - [Features](#-key-features)
- - [Examples](#-examples)
+## 🎯 Why Futurable?
 
----
+JavaScript's async ecosystem has evolved dramatically over the years—from callbacks to Promises, from async/await to various control flow libraries. Yet, despite this evolution, **critical gaps remain** in how we handle asynchronous operations in production applications.
 
-## 📖 About
+### The Problem
 
-**Futurable** is a powerful TypeScript library that extends JavaScript's native `Promise` and `Fetch` APIs with advanced features like **cancellation**, **delays**, **polling**, and more. Built for both browser and Node.js environments, it provides an intuitive API to handle async operations with greater control.
+Modern applications need more than just Promises. They need:
 
-### Why Futurable?
+- **Cancellation**: Stop long-running operations when they're no longer needed
+- **Composition**: Build complex async workflows without callback hell or try-catch pyramids
+- **Control**: Fine-grained management of concurrency, retries, timeouts, and fallbacks
+- **Safety**: Handle errors explicitly without littering code with try-catch blocks
+- **Reusability**: Define async operations once, execute them multiple times
 
-JavaScript's Promise API is powerful but lacks some crucial features for modern applications:
+JavaScript's native Promise API offers none of these. AbortController exists but requires verbose boilerplate. Third-party solutions are either too opaque (RxJS), too heavy, or too limited in scope.
 
-- ❌ No way to cancel pending promises
-- ❌ No built-in delay or sleep functionality
-- ❌ Fetch API doesn't support request cancellation easily
-- ❌ No polling mechanism out of the box
-- ❌ Complex AbortController boilerplate
+### The Solution
 
-**Futurable solves all of these problems** with a clean, Promise-compatible API that feels natural to use.
+**Futurable** fills this gap with two complementary primitives:
 
----
+1. **`Futurable`**: A Promise with superpowers—cancellable, chainable, and resource-aware
+2. **`FuturableTask`**: A lazy computation model for functional async composition
 
-## ✨ Key Features
-
-- ✅ **Full Promise Compatibility** - Works as a drop-in replacement for native Promises
-- ✅ **Cancellable Operations** - Cancel any async operation with ease
-- ✅ **Fetch Integration** - Built-in cancellable fetch with AbortController support
-- ✅ **Delays & Sleep** - Add delays without complex setTimeout logic
-- ✅ **Polling Support** - Built-in polling mechanism with cancellation
-- ✅ **TypeScript First** - Full type safety with excellent IDE support
-- ✅ **Tree-shakeable** - Import only what you need
-- ✅ **Zero Dependencies** - Lightweight and fast
-- ✅ **Universal** - Works in Node.js and all modern browsers
-- ✅ **100% Test Coverage** - Battle-tested and reliable
+Together, they provide everything you need to write **robust, maintainable, production-ready async code**.
 
 ---
 
-## 🚀 Quick Start
+## 📖 What is Futurable?
 
-### Installation
+### Futurable: Cancellable Promises
 
-```bash
-# npm
-npm install @ndriadev/futurable
+`Futurable` extends the native Promise API with built-in cancellation support. It's a **drop-in replacement** for Promise that solves the resource management problem.
 
-# yarn
-yarn add @ndriadev/futurable
-
-# pnpm
-pnpm add @ndriadev/futurable
-```
-
-### Basic Usage
+**The core insight:** When you navigate away from a page, close a modal, or change a filter, you don't just want to ignore pending operations—you want to **actively stop** them and **clean up resources**.
 
 ```typescript
 import { Futurable } from '@ndriadev/futurable';
 
-// Create a cancellable promise
-const futurable = new Futurable((resolve, reject, { cancel, signal }) => {
-  const timeoutId = setTimeout(() => resolve('Done!'), 2000);
+// Create a cancellable fetch request
+const request = Futurable.fetch('https://api.example.com/data')
+  .then(res => res.json())
+  .then(data => console.log(data));
 
-  // Clean up when cancelled
-  signal.addEventListener('abort', () => {
-    clearTimeout(timeoutId);
+// User navigates away? Cancel it.
+request.cancel();
+```
+
+**Why this matters:**
+
+- **Memory leaks**: Prevented by cancelling pending operations
+- **Race conditions**: Eliminated by cancelling stale requests
+- **Resource management**: WebSocket connections, timers, and event listeners properly cleaned up
+- **User experience**: No more stale data updates after navigation
+
+#### When to use Futurable
+
+Use `Futurable` when you need **immediate execution** with cancellation support:
+
+- React/Vue component effects that need cleanup
+- API requests that should be cancellable
+- Any Promise-based code where you might need to cancel
+- Drop-in replacement for existing Promise code
+
+---
+
+## 🎯 What is FuturableTask?
+
+### FuturableTask: Lazy Async Composition
+
+`FuturableTask` represents a **blueprint** for async work—it doesn't execute until you explicitly run it. Think of it as a recipe: you write it once, then bake it multiple times with different ingredients.
+
+**The core insight:** Many async operations benefit from **lazy evaluation**—separating the definition of work from its execution enables powerful patterns like retry, memoization, and functional composition.
+
+```typescript
+import { FuturableTask } from '@ndriadev/futurable';
+
+// Define the work (doesn't execute yet)
+const fetchUser = FuturableTask
+  .fetch('/api/user')
+  .map(res => res.json())
+  .filter(user => user.active)
+  .retry(3)
+  .timeout(5000)
+  .memoize();
+
+// Execute when needed
+const user = await fetchUser.run();
+
+// Execute again (uses memoized result)
+const sameUser = await fetchUser.run();
+```
+
+**Why this matters:**
+
+- **Reusability**: Define once, execute many times
+- **Composition**: Chain transformations before execution
+- **Testing**: Easy to test without execution
+- **Optimization**: Memoization, batching, and deduplication
+- **Declarative**: Describe what should happen, not when
+
+#### When to use FuturableTask
+
+Use `FuturableTask` when you need **lazy evaluation** with advanced composition:
+
+- Building reusable async workflows
+- Complex pipelines with retry/timeout/fallback logic
+- Operations that should be memoized or deduplicated
+- Functional programming patterns in async code
+- Rate-limited or batched API calls
+
+---
+
+## 🚀 Core Capabilities
+
+### For Futurable
+
+#### Cancellation
+
+Stop operations and clean up resources:
+
+```typescript
+const request = Futurable.fetch('/api/data')
+  .then(res => res.json())
+  .onCancel(() => {
+    console.log('Cleanup: close connections, clear timers');
   });
+
+// Cancel anytime
+request.cancel();
+```
+
+#### Built-in Utilities
+
+Native support for common patterns:
+
+```typescript
+// Sleep/delay
+await Futurable.sleep(1000);
+
+// Delayed execution
+const result = await new Futurable(resolve => {
+  resolve('value');
+}).delay(() => 'delayed', 2000);
+
+// Polling
+const status = await Futurable.polling(
+  () => checkStatus(),
+  1000 // every second
+);
+
+// Cancellable fetch
+const data = await Futurable.fetch('/api/data')
+  .then(res => res.json());
+```
+
+#### Safe Error Handling
+
+Handle errors without try-catch:
+
+```typescript
+const result = await Futurable.fetch('/api/data')
+  .then(res => res.json())
+  .safe();
+
+if (result.success) {
+  console.log(result.data);
+} else {
+  console.error(result.error);
+}
+```
+
+---
+
+### For FuturableTask
+
+#### Functional Composition
+
+Build complex pipelines declaratively:
+
+```typescript
+const pipeline = FuturableTask
+  .fetch('/api/users')
+  .map(res => res.json())
+  .filter(users => users.length > 0)
+  .map(users => users.filter(u => u.active))
+  .map(users => users.sort((a, b) => a.name.localeCompare(b.name)))
+  .tap(users => console.log(`Found ${users.length} active users`));
+
+const users = await pipeline.run();
+```
+
+#### Error Recovery
+
+Sophisticated error handling strategies:
+
+```typescript
+const resilient = FuturableTask
+  .fetch('/api/data')
+  .retry(3, {
+    delay: 1000,
+    backoff: 2  // exponential backoff
+  })
+  .timeout(5000)
+  .orElse(() => FuturableTask.fetch('/api/backup'))
+  .fallbackTo(() => CACHED_DATA);
+```
+
+#### Concurrency Control
+
+Fine-grained control over parallel execution:
+
+```typescript
+// Limit concurrent requests
+const limiter = FuturableTask.createLimiter(5, {
+  onActive: () => console.log('Task started'),
+  onIdle: () => console.log('All done')
 });
 
-// Cancel it before it completes
-setTimeout(() => futurable.cancel(), 1000);
+const tasks = urls.map(url =>
+  limiter(FuturableTask.fetch(url))
+);
+
+// Only 5 run at once
+const results = await FuturableTask.parallel(tasks).run();
+```
+
+#### Debouncing
+
+Automatic debouncing for user input:
+
+```typescript
+const search = FuturableTask
+  .of((query: string) => searchAPI(query))
+  .debounce(300);
+
+// Rapid calls - only last executes
+search.run('a');   // cancelled
+search.run('ab');  // cancelled
+search.run('abc'); // executes after 300ms
+```
+
+#### Memoization
+
+Cache expensive operations:
+
+```typescript
+const loadConfig = FuturableTask
+  .fetch('/api/config')
+  .map(res => res.json())
+  .memoize();
+
+const config1 = await loadConfig.run(); // Fetches
+const config2 = await loadConfig.run(); // Cached
+const config3 = await loadConfig.run(); // Cached
 ```
 
 ---
 
-## 💡 Examples
+## 💡 Real-World Examples
 
-### Cancellable Fetch Request
-
-```typescript
-import { Futurable } from '@ndriadev/futurable';
-
-// Make a cancellable API request
-const request = Futurable.fetch('https://api.example.com/data')
-  .then(response => response.json())
-  .then(data => console.log(data))
-  .catch(error => console.error('Request failed:', error));
-
-// Cancel after 5 seconds if not completed
-setTimeout(() => request.cancel(), 5000);
-```
-
-### React Hook with Auto-Cleanup
+### React Component with Cleanup
 
 ```typescript
 import { useEffect, useState } from 'react';
@@ -124,326 +289,264 @@ import { Futurable } from '@ndriadev/futurable';
 
 function UserProfile({ userId }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const request = Futurable
-      .fetch(`https://api.example.com/users/${userId}`)
-      .then(res => res.json())
-      .then(setUser);
+    setLoading(true);
 
-    // Automatically cancel on component unmount
+    const request = Futurable
+      .fetch(`/api/users/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        setUser(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        if (error.name !== 'AbortError') {
+          console.error(error);
+        }
+        setLoading(false);
+      });
+
+    // Cleanup on unmount or userId change
     return () => request.cancel();
   }, [userId]);
 
+  if (loading) return <div>Loading...</div>;
   return <div>{user?.name}</div>;
 }
 ```
 
-### Sleep & Delay
+### Reusable API Client
 
 ```typescript
-import { Futurable } from '@ndriadev/futurable';
+class APIClient {
+  private baseURL = 'https://api.example.com';
 
-// Simple sleep
-await Futurable.sleep(1000); // Wait 1 second
-console.log('Slept for 1 second');
+  // Reusable task definitions
+  fetchUser = (id: number) =>
+    FuturableTask
+      .fetch(`${this.baseURL}/users/${id}`)
+      .map(res => res.json())
+      .retry(3)
+      .timeout(5000)
+      .memoize();
 
-// Delay with callback
-const result = await new Futurable((resolve) => {
-  resolve('initial value');
-}).delay(() => 'delayed value', 2000);
+  searchUsers = (query: string) =>
+    FuturableTask
+      .fetch(`${this.baseURL}/users/search?q=${query}`)
+      .map(res => res.json())
+      .debounce(300)
+      .timeout(10000);
 
-console.log(result); // 'delayed value' after 2 seconds
+  // Execute when needed
+  async getUser(id: number) {
+    return this.fetchUser(id).run();
+  }
+
+  async search(query: string) {
+    return this.searchUsers(query).run();
+  }
+}
 ```
 
-### Polling
+### Complex Data Pipeline
 
 ```typescript
-import { Futurable } from '@ndriadev/futurable';
+const processData = FuturableTask
+  .fetch('/api/raw-data')
+  .map(res => res.json())
+  .tap(data => console.log(`Received ${data.length} items`))
+  .filter(data => data.length > 0, 'No data available')
+  .map(data => data.map(item => ({
+    ...item,
+    processed: true,
+    timestamp: Date.now()
+  })))
+  .flatMap(data =>
+    FuturableTask.traverse(
+      data,
+      item => FuturableTask.of(() => enrichItem(item))
+    )
+  )
+  .tap(results => console.log(`Processed ${results.length} items`))
+  .retry(2, { delay: 1000 })
+  .timeout(30000)
+  .fallbackTo(error => {
+    console.error('Pipeline failed:', error);
+    return [];
+  });
 
-// Poll an API endpoint every 5 seconds
-const polling = Futurable.polling(
-  () => Futurable.fetch('https://api.example.com/status')
-    .then(res => res.json()),
-  5000 // interval in ms
-);
-
-polling
-  .then(data => console.log('Status:', data))
-  .catch(error => console.error('Polling error:', error));
-
-// Stop polling after 30 seconds
-setTimeout(() => polling.cancel(), 30000);
+const results = await processData.run();
 ```
 
-### Convert Existing Promises
+### Rate-Limited Batch Processing
 
 ```typescript
-import { Futurable } from '@ndriadev/futurable';
+async function processLargeDataset(items: Item[]) {
+  // Create limiter (max 10 concurrent)
+  const limiter = FuturableTask.createLimiter(10, {
+    onActive: () => console.log(`Active: ${limiter.activeCount}/10`),
+    onCompleted: (result) => updateProgress(result),
+    onIdle: () => console.log('Batch complete')
+  });
 
-// Convert any promise to a Futurable
-const regularPromise = fetch('https://api.example.com/data');
-const futurable = Futurable.futurizable(regularPromise);
+  // Process in batches of 50
+  const batches = chunk(items, 50);
 
-// Now it's cancellable!
-futurable.cancel();
-```
+  const results = await FuturableTask.sequence(
+    batches.map(batch =>
+      FuturableTask.parallel(
+        batch.map(item =>
+          limiter(
+            FuturableTask
+              .of(() => processItem(item))
+              .retry(3)
+              .timeout(5000)
+          )
+        )
+      )
+    )
+  ).run();
 
-### Static Methods (All Promise Methods Supported)
-
-```typescript
-import { Futurable } from '@ndriadev/futurable';
-
-// All static Promise methods work with cancellation support
-const results = await Futurable.all([
-  Futurable.fetch('/api/users'),
-  Futurable.fetch('/api/posts'),
-  Futurable.fetch('/api/comments')
-]);
-
-// Cancel all requests at once
-results.cancel();
+  return results.flat();
+}
 ```
 
 ---
 
-## 🎯 FuturableTask: Lazy Computation for Advanced Workflows
+## 🎨 Design Philosophy
 
-While `Futurable` extends Promise for eager execution, **`FuturableTask`** provides lazy computation with powerful functional composition capabilities. Think of it as a blueprint for async operations that only execute when you explicitly run them.
+### 1. Progressive Enhancement
 
-### Why FuturableTask?
+Start simple, add complexity only when needed:
 
-- ⏱️ **Lazy Execution** - Define operations without executing them
-- 🔄 **Reusable** - Run the same task multiple times independently
-- 🧩 **Composable** - Chain transformations before execution
-- 🎛️ **Concurrency Control** - Built-in rate limiting and debouncing
-- 💾 **Memoization** - Cache results for expensive operations
-- 🔁 **Advanced Patterns** - Retry, timeout, fallback, and more
+```typescript
+// Simple
+const data = await Futurable.fetch('/api/data')
+  .then(res => res.json());
 
-### Quick Example
+// Add cancellation
+const request = Futurable.fetch('/api/data')
+  .then(res => res.json());
+request.cancel();
+
+// Add retry and timeout
+const resilient = FuturableTask
+  .fetch('/api/data')
+  .map(res => res.json())
+  .retry(3)
+  .timeout(5000);
+```
+
+### 2. Type Safety First
+
+Full TypeScript support with inference:
+
+```typescript
+const result = await FuturableTask
+  .of(() => 42)                    // FuturableTask<number>
+  .map(x => x.toString())          // FuturableTask<string>
+  .filter(s => s.length > 0)       // FuturableTask<string>
+  .run();                          // Promise<string>
+```
+
+### 3. Zero Dependencies
+
+No external dependencies. Small bundle size. Tree-shakeable.
+
+### 4. Promise Compatible
+
+`Futurable` **is** a Promise. Works with `async/await`, `Promise.all()`, and any Promise-based API.
+
+---
+
+## 📦 Installation
+
+```bash
+npm install @ndriadev/futurable
+```
+
+```bash
+yarn add @ndriadev/futurable
+```
+
+```bash
+pnpm add @ndriadev/futurable
+```
+
+---
+
+## 🎯 Quick Start
+
+### Basic Futurable
+
+```typescript
+import { Futurable } from '@ndriadev/futurable';
+
+// Cancellable fetch
+const request = Futurable.fetch('/api/data')
+  .then(res => res.json());
+
+request.cancel(); // Cancel if needed
+```
+
+### Basic FuturableTask
 
 ```typescript
 import { FuturableTask } from '@ndriadev/futurable';
 
-// Define a task (not executed yet!)
-const fetchUser = FuturableTask
-  .of(() => fetch('/api/user'))
-  .map(res => res.json())
-  .retry(3)              // Retry on failure
-  .timeout(5000)         // 5 second timeout
-  .memoize();            // Cache the result
-
-// Execute when needed
-const user = await fetchUser.run();
-
-// Execute again - uses cached result
-const sameUser = await fetchUser.run();
-```
-
-### Key Features
-
-#### Lazy Evaluation
-```typescript
-// Creating a task doesn't execute it
-const task = FuturableTask.of(() => {
-  console.log('Executing!');
-  return expensiveOperation();
-});
-// Nothing logged yet
-
-// Execute when ready
-const result = await task.run(); // Now it executes
-```
-
-#### Functional Composition
-```typescript
-const pipeline = FuturableTask
+// Define work
+const task = FuturableTask
   .of(() => fetch('/api/data'))
   .map(res => res.json())
-  .filter(data => data.active)
-  .map(data => processData(data))
-  .retry(3)
-  .timeout(10000);
+  .retry(3);
 
-// All transformations applied during execution
-const result = await pipeline.run();
+// Execute when ready
+const data = await task.run();
 ```
-
-#### Concurrency Control
-```typescript
-// Limit concurrent executions
-const limiter = FuturableTask.createLimiter(2, {
-  onActive: (task) => console.log('Task started'),
-  onCompleted: (result) => console.log('Task done:', result)
-});
-
-const tasks = urls.map(url =>
-  limiter(FuturableTask.fetch(url))
-);
-
-// Only 2 tasks run concurrently
-await FuturableTask.parallel(tasks).run();
-```
-
-#### Advanced Error Handling
-```typescript
-const task = FuturableTask
-  .of(() => riskyOperation())
-  .retry(3, { delay: 1000 })        // Retry with backoff
-  .timeout(5000)                     // Timeout protection
-  .orElse(() => FuturableTask.resolve(fallbackValue))  // Fallback
-  .fallbackTo(error => {                // Error fallbackToy
-    console.error('Failed:', error);
-    return defaultValue;
-  });
-
-const result = await task.run();
-```
-
-#### Debouncing & Throttling
-```typescript
-// Debounce expensive operations
-const searchTask = FuturableTask
-  .of((query) => searchAPI(query))
-  .debounce(300);  // Wait 300ms after last call
-
-// Multiple rapid calls
-searchTask.run('a');
-searchTask.run('ab');
-searchTask.run('abc');  // Only this executes
-```
-
-#### Sequential & Parallel Execution
-```typescript
-// Execute tasks in sequence
-const sequential = FuturableTask.sequence([
-  FuturableTask.fetch('/api/step1'),
-  FuturableTask.fetch('/api/step2'),
-  FuturableTask.fetch('/api/step3')
-]);
-
-// Execute tasks in parallel
-const parallel = FuturableTask.parallel([
-  FuturableTask.fetch('/api/users'),
-  FuturableTask.fetch('/api/posts'),
-  FuturableTask.fetch('/api/comments')
-]);
-
-const results = await parallel.run();
-```
-
-### Common Patterns
-
-#### Retry with Exponential Backoff
-```typescript
-const resilientTask = FuturableTask
-  .of(() => unreliableAPI())
-  .retry(5, {
-    delay: 1000,
-    backoff: 2  // 1s, 2s, 4s, 8s, 16s
-  });
-```
-
-#### Polling Until Condition
-```typescript
-const pollUntilReady = FuturableTask
-  .until(
-    async () => await checkStatus() === 'ready',
-    FuturableTask.of(() => fetch('/api/status')).delay(1000)
-  );
-
-await pollUntilReady.run();
-```
-
-#### Batch Processing with Limits
-```typescript
-const limiter = FuturableTask.createLimiter(5);
-
-const processAllFiles = FuturableTask.traverse(
-  filePaths,
-  path => limiter(FuturableTask.of(() => processFile(path)))
-);
-
-await processAllFiles.run();
-```
-
-#### Race with Timeout
-```typescript
-const quickestResult = FuturableTask.race([
-  FuturableTask.fetch('/api/fast'),
-  FuturableTask.fetch('/api/slow'),
-  FuturableTask.sleep(3000).map(() => 'timeout')
-]);
-
-const result = await quickestResult.run();
-```
-
-### API Methods
-
-| Method | Description |
-|--------|-------------|
-| `of()` | Create a task from a function |
-| `run()` | Execute the task |
-| `map()` | Transform the result |
-| `flatMap()` | Transform and flatten |
-| `filter()` | Conditionally succeed |
-| `retry()` | Retry on failure |
-| `timeout()` | Add timeout protection |
-| `delay()` | Delay execution |
-| `debounce()` | Debounce execution |
-| `memoize()` | Cache results |
-| `orElse()` | Fallback task |
-| `tap()` | Side effects |
-| `finally()` | Cleanup logic |
-
-### Static Combinators
-
-| Method | Description |
-|--------|-------------|
-| `sequence()` | Execute tasks sequentially |
-| `parallel()` | Execute tasks in parallel |
-| `race()` | First task to complete |
-| `all()` | All tasks must succeed |
-| `allSettled()` | Wait for all to finish |
-| `traverse()` | Map and execute sequentially |
-| `whilst()` | Loop while condition |
-| `until()` | Loop until condition |
-| `times()` | Repeat n times |
 
 ---
 
-## 📚 API Reference
+## 📚 Documentation
 
-For complete API documentation, visit [futurable.ndria.dev](https://futurable.ndria.dev/)
+📖 **[Complete Documentation](https://futurable.ndria.dev/)**
 
-### Core Methods
+- [Getting Started Guide](https://futurable.ndria.dev/guide/getting-started)
+- [Futurable API Reference](https://futurable.ndria.dev/api/constructor)
+- [FuturableTask Guide](https://futurable.ndria.dev/guide-task/introduction)
+- [Examples & Patterns](https://futurable.ndria.dev/examples/)
 
-| Method | Description |
-|--------|-------------|
-| `cancel()` | Cancels the futurable operation |
-| `onCancel(callback)` | Executes callback when cancelled |
-| `sleep(ms)` | Waits for specified milliseconds |
-| `delay(callback, ms)` | Delays execution of callback |
-| `fetch(url, options)` | Cancellable fetch request |
-| `futurizable(promise)` | Converts Promise to Futurable |
+---
 
-### Static Methods
+## 🌟 Key Features
 
-All native Promise static methods are supported:
-- `Futurable.all()`
-- `Futurable.allSettled()`
-- `Futurable.any()`
-- `Futurable.race()`
-- `Futurable.resolve()`
-- `Futurable.reject()`
-- `Futurable.withResolvers()`
+### Futurable
 
-Plus additional methods:
-- `Futurable.polling()` - Polling with interval support
-- `Futurable.sleep()` - Static sleep utility
-- `Futurable.delay()` - Static delay utility
-- `Futurable.fetch()` - Static fetch utility
-- `Futurable.futurizable()` - Convert Promise to Futurable
+| Feature | Description |
+|---------|-------------|
+| ✅ **Cancellation** | Cancel operations and cleanup resources |
+| ✅ **Promise Compatible** | Drop-in Promise replacement |
+| ✅ **Built-in Fetch** | Cancellable HTTP requests |
+| ✅ **Delays & Sleep** | Timing utilities |
+| ✅ **Polling** | Repeated execution with cancellation |
+| ✅ **Safe Mode** | Error handling without try-catch |
+| ✅ **Full TypeScript** | Complete type safety |
+
+### FuturableTask
+
+| Feature | Description |
+|---------|-------------|
+| ✅ **Lazy Evaluation** | Define once, execute when needed |
+| ✅ **Reusability** | Run the same task multiple times |
+| ✅ **Functional Composition** | map, filter, flatMap, tap, and more |
+| ✅ **Retry Logic** | Exponential backoff and conditional retry |
+| ✅ **Timeout Protection** | Automatic timeouts |
+| ✅ **Error Recovery** | Fallbacks and error handling |
+| ✅ **Concurrency Control** | Rate limiting and parallelism |
+| ✅ **Debouncing** | Built-in debouncing |
+| ✅ **Memoization** | Cache expensive operations |
+| ✅ **Full TypeScript** | Complete type inference |
 
 ---
 
@@ -451,22 +554,23 @@ Plus additional methods:
 
 ### Perfect For
 
-- **SPA Applications** - Cancel API calls when navigating away
-- **React/Vue/Angular** - Clean up effects and prevent memory leaks
-- **Real-time Updates** - Implement polling with easy cancellation
-- **Long-running Operations** - Timeout or cancel expensive operations
-- **Resource Management** - Proper cleanup of async resources
-- **Testing** - Better control over async test scenarios
+- **SPA Applications**: Cancel API calls on navigation
+- **React/Vue/Angular**: Component cleanup and effects
+- **Real-time Features**: Polling with cancellation
+- **Data Processing**: Complex async pipelines
+- **API Clients**: Reusable, composable requests
+- **Rate Limiting**: Control concurrent operations
+- **Form Handling**: Debounced search and auto-save
+- **Resource Management**: Proper async cleanup
 
 ---
 
 ## 🌐 Browser & Node.js Support
 
 - ✅ All modern browsers (Chrome, Firefox, Safari, Edge)
-- ✅ Node.js 14+ (Native Fetch API support in Node.js 17.5+)
+- ✅ Node.js 14+
 - ✅ TypeScript 4.5+
-
-> **Note for Node.js < 17.5:** Install `node-fetch` for fetch functionality
+- ✅ ES2015+ (ES6+)
 
 ---
 
@@ -476,18 +580,27 @@ Plus additional methods:
 
 ---
 
-## 📞 Support
+## 🙏 Acknowledgments
 
-- **Issues:** [GitHub Issues](https://github.com/nDriaDev/vite-plugin-universal-api/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/nDriaDev/vite-plugin-universal-api/discussions)
-- **Email:** info@ndria.dev
+Futurable draws inspiration from:
+- **Promises/A+** specification
+- **RxJS** observables and operators
+- **Fluture** and functional programming patterns
+- Real-world production challenges in modern web apps
 
 ---
 
+## 📞 Support
 
+- **Documentation**: [futurable.ndria.dev](https://futurable.ndria.dev/)
+- **Issues**: [GitHub Issues](https://github.com/nDriaDev/futurable/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/nDriaDev/futurable/discussions)
+- **Email**: info@ndria.dev
+
+---
 
 <div align="center">
 
+**If you find Futurable useful, please consider giving it a ⭐ on [GitHub](https://github.com/nDriaDev/futurable)!**
 
-If you find this plugin useful, please consider giving it a ⭐ on [GitHub](https://github.com/nDriaDev/vite-plugin-universal-api)!
 </div>
