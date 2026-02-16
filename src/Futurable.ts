@@ -138,18 +138,6 @@ export type FuturableExecutor<T> = (
 export type FuturableIterable<T = any> = Iterable<FuturableLike<T> | PromiseLike<T> | T>;
 
 /**
-* Internal status tracking for Futurable lifecycle.
-*/
-enum FUTURABLE_STATUS {
-	/** The Futurable has been created but not yet resolved or rejected */
-	PENDING = "pending",
-	/** The Futurable has been successfully resolved with a value */
-	FULFILLED = "fulfilled",
-	/** The Futurable has been rejected with a reason */
-	REJECTED = "rejected"
-}
-
-/**
 * Return type of Futurable.withResolvers() static method.
 * Provides direct access to the Futurable and its control functions.
 *

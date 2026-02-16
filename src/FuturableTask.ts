@@ -1,4 +1,4 @@
-import { Futurable, FuturableExecutor, FuturableUtils } from "./Futurable";
+import { Futurable, FuturableExecutor, FuturableReject, FuturableResolve, FuturableUtils } from "./Futurable";
 
 /**
  * Configuration options for memoization behavior.
@@ -1813,7 +1813,7 @@ export class FuturableTask<T> {
 		if (typeof input === "function") {
 			return new FuturableTask<U>(async (res, rej, utils) => {
 				try {
-					res(await (input as Function)(utils));
+					res(await (input as (utils: FuturableUtils<U>) => Promise<U>)(utils));
 				} catch (error) {
 					rej(error);
 				}
@@ -2334,13 +2334,11 @@ export class FuturableTask<T> {
 			const runningTasks: Futurable<T>[] = [];
 			let running = 0,
 				completed = 0,
-				index = 0,
-				failed = false;
+				index = 0;
 			utils.onCancel(() => {
-				failed = true;
 				runningTasks.forEach(t => t.cancel());
 			});
-			const next = (resolve: Function, reject: Function) => {
+			const next = (resolve: FuturableResolve<T[]>, reject: FuturableReject) => {
 				if (completed === tasks.length) {
 					return resolve(results);
 				}
@@ -2359,7 +2357,6 @@ export class FuturableTask<T> {
 							next(resolve, reject);
 						})
 						.catch((e: any) => {
-							failed = true;
 							runningTasks.forEach(t => t.cancel());
 							reject(e);
 						});

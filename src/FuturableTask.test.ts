@@ -373,7 +373,7 @@ describe('FuturableTask', () => {
 
 		describe('andThen', () => {
 			it('should sequence tasks', async () => {
-				let order: number[] = [];
+				const order: number[] = [];
 				const task1 = new FuturableTask((resolve) => {
 					order.push(1);
 					resolve('first');
