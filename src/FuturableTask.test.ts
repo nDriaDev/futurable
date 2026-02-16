@@ -1,10 +1,16 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
 import { FuturableTask, FuturableTaskLimiter } from './FuturableTask';
 import { Futurable } from './Futurable';
 
 // Mock timers
 vi.useFakeTimers();
 
+beforeAll(() => {
+	process.on('unhandledRejection', (reason) => {
+		console.error('🔥 UNHANDLED:', reason);
+		console.trace();
+	});
+})
 describe('FuturableTask', () => {
 	afterEach(() => {
 		vi.clearAllTimers();
@@ -458,13 +464,20 @@ describe('FuturableTask', () => {
 			});
 
 			it('should propagate original error even if side effect throws', async () => {
+				const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+
 				const originalError = new Error('original');
 				const task = new FuturableTask((_, reject) => {
 					reject(originalError);
 				}).tapError(() => {
 					throw new Error('side effect error');
 				});
+
 				await expect(task.run()).rejects.toThrow('original');
+
+				expect(consoleErrorSpy).toHaveBeenCalled();
+
+				consoleErrorSpy.mockRestore();
 			});
 		});
 
@@ -600,8 +613,9 @@ describe('FuturableTask', () => {
 					setTimeout(() => resolve(42), 200);
 				}).timeout(100);
 				const promise = task.run();
+				const result = expect(promise).rejects.toBe('TimeoutExceeded');
 				await vi.advanceTimersByTimeAsync(100);
-				await expect(promise).rejects.toBe('TimeoutExceeded');
+				await result;
 			});
 
 			it('should resolve if completes in time', async () => {
@@ -618,8 +632,10 @@ describe('FuturableTask', () => {
 					setTimeout(() => resolve(42), 200);
 				}).timeout(100, new Error('Custom timeout'));
 				const promise = task.run();
-				await vi.advanceTimersByTimeAsync(100);
-				await expect(promise).rejects.toThrow('Custom timeout');
+				await Promise.all([
+					vi.advanceTimersByTimeAsync(100),
+					expect(promise).rejects.toThrow('Custom timeout')
+				]);
 			});
 
 			it('should clear timeout when task is cancelled', async () => {
@@ -638,8 +654,10 @@ describe('FuturableTask', () => {
 				}).timeout(100);
 
 				const promise = task.run();
-				await vi.advanceTimersByTimeAsync(50);
-				await expect(promise).rejects.toThrow('Task error');
+				await Promise.all([
+					vi.advanceTimersByTimeAsync(50),
+					expect(promise).rejects.toThrow('Task error')
+				]);
 			});
 		});
 
@@ -1034,8 +1052,9 @@ describe('FuturableTask', () => {
 					new FuturableTask((_, reject) => setTimeout(() => reject('error'), 50))
 				];
 				const promise = FuturableTask.race(tasks).run();
+				const result = expect(promise).rejects.toBe('error');
 				await vi.advanceTimersByTimeAsync(50);
-				await expect(promise).rejects.toBe('error');
+				await result;
 			});
 		});
 
@@ -1152,10 +1171,10 @@ describe('FuturableTask', () => {
 				}).onCancel(cancelCallback2);
 
 				const promise = FuturableTask.parallel([task1, task2, task3], 3).run();
+				const result = expect(promise).rejects.toBe('error');
 				await vi.advanceTimersByTimeAsync(50);
 
-				await expect(promise).rejects.toBe('error');
-				// When one task fails, all running tasks should be cancelled
+				await result;
 			});
 
 			it('should handle cancellation of parallel tasks', async () => {
@@ -1191,6 +1210,7 @@ describe('FuturableTask', () => {
 				});
 
 				const promise = FuturableTask.parallel([task1, task2, task3, task4], 3).run();
+				const result = expect(promise).rejects.toBe('error');
 
 				// task2 fails at 25ms, setting failed=true
 				await vi.advanceTimersByTimeAsync(25);
@@ -1201,7 +1221,7 @@ describe('FuturableTask', () => {
 				// task3 completes at 75ms and calls next(), but should also return immediately
 				await vi.advanceTimersByTimeAsync(25);
 
-				await expect(promise).rejects.toBe('error');
+				await result;
 			});
 		});
 
