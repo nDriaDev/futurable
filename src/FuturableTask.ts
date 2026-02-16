@@ -1,4 +1,4 @@
-import { Futurable, FuturableExecutor, FuturableUtils } from ".";
+import { Futurable, FuturableExecutor, FuturableUtils } from "./Futurable";
 
 /**
  * Configuration options for memoization behavior.
@@ -407,6 +407,90 @@ export class FuturableTask<T> {
 		}
 
 		return f;
+	}
+
+	/**
+	 * Executes the task and returns a SafeResult instead of throwing errors.
+	 *
+	 * This method wraps the task execution in a try-catch pattern that returns
+	 * a discriminated union type, making error handling explicit and type-safe.
+	 *
+	 * The returned Futurable resolves to a SafeResult object that contains either:
+	 * - `{ success: true, data: T, error: null }` on success
+	 * - `{ success: false, data: null, error: E }` on failure
+	 *
+	 * This pattern eliminates the need for try-catch blocks and makes error
+	 * handling explicit at the type level, similar to Rust's Result type.
+	 *
+	 * @template E - The type of error (defaults to unknown)
+	 * @param overrideSignal - Optional signal to override/supplement the task's default signal
+	 * @returns A Futurable that always resolves with a SafeResult (never rejects)
+	 *
+	 * @example
+	 * ```typescript
+	 * const task = FuturableTask.of(() => riskyOperation());
+	 * const result = await task.runSafe();
+	 *
+	 * if (result.success) {
+	 *   console.log('Success:', result.data);
+	 *   // TypeScript knows result.data is T
+	 * } else {
+	 *   console.error('Error:', result.error);
+	 *   // TypeScript knows result.error is E
+	 * }
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // Chaining multiple safe operations
+	 * const result1 = await task1.runSafe();
+	 * if (!result1.success) return result1.error;
+	 *
+	 * const result2 = await task2.runSafe();
+	 * if (!result2.success) return result2.error;
+	 *
+	 * return { data1: result1.data, data2: result2.data };
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // With explicit error type
+	 * const task = FuturableTask.of(() => fetchUser(id));
+	 * const result = await task.runSafe<ApiError>();
+	 *
+	 * if (!result.success) {
+	 *   // result.error is typed as ApiError
+	 *   console.error('API Error:', result.error.statusCode);
+	 * }
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // Functional error handling without exceptions
+	 * const results = await Promise.all([
+	 *   task1.runSafe(),
+	 *   task2.runSafe(),
+	 *   task3.runSafe()
+	 * ]);
+	 *
+	 * const errors = results.filter(r => !r.success);
+	 * const successes = results.filter(r => r.success);
+	 *
+	 * console.log(`${successes.length} succeeded, ${errors.length} failed`);
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // With cancellation support
+	 * const controller = new AbortController();
+	 * const result = await task.runSafe(controller.signal);
+	 *
+	 * // Can be cancelled externally
+	 * controller.abort();
+	 * ```
+	 */
+	runSafe<E = unknown>(overrideSignal?: AbortSignal): Futurable<import('./Futurable').SafeResult<T, E>> {
+		return this.run(overrideSignal).safe<E>();
 	}
 
 	/**
@@ -1726,7 +1810,7 @@ export class FuturableTask<T> {
 	 * const task = FuturableTask.of(() => operation(), controller.signal);
 	 * ```
 	 */
-	static of<U>(input: U | ((utils?: FuturableUtils<U>) => Promise<U>), signal?: AbortSignal): FuturableTask<U> {
+	static of<U>(input: U | ((utils: FuturableUtils<U>) => Promise<U>), signal?: AbortSignal): FuturableTask<U> {
 		if (typeof input === "function") {
 			return new FuturableTask<U>(async (res, rej, utils) => {
 				try {
@@ -2258,9 +2342,6 @@ export class FuturableTask<T> {
 				runningTasks.forEach(t => t.cancel());
 			});
 			const next = (resolve: Function, reject: Function) => {
-				if (failed) {
-					return;
-				}
 				if (completed === tasks.length) {
 					return resolve(results);
 				}
