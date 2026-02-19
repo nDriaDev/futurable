@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/nDriaDev/futurable/releases/tag/v3.0.1) - 2026-02-19
+
+### Chores
+
+- update dependencies ([df89035](https://github.com/nDriaDev/futurable/commit/df89035))
+- update automated scripts ([e27d4a1](https://github.com/nDriaDev/futurable/commit/e27d4a1))
+
 ## [3.0.0](https://github.com/nDriaDev/futurable/releases/tag/v3.0.0) - 2026-02-16
 
 ### Features
