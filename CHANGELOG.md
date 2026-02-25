@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.2.0](https://github.com/nDriaDev/futurable/releases/tag/v3.2.0) - 2026-02-25
+
+- Initial release
+
 ## [3.1.0](https://github.com/nDriaDev/futurable/releases/tag/v3.1.0) - 2026-02-25
 
 ### Chores
