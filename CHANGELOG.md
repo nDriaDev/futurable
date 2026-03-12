@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.2.1](https://github.com/nDriaDev/futurable/releases/tag/v3.2.1) - 2026-03-12
+
+### Bug Fixes
+
+- previous commit ([6bfb5ce](https://github.com/nDriaDev/futurable/commit/6bfb5ce))
+
+### Chores
+
+- update dependencies ([b94a00c](https://github.com/nDriaDev/futurable/commit/b94a00c))
+
 ## [3.2.0](https://github.com/nDriaDev/futurable/releases/tag/v3.2.0) - 2026-02-25
 
 - Initial release
