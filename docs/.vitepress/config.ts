@@ -1,11 +1,30 @@
-import { defineConfig } from 'vitepress'
+import { DefaultTheme, defineConfig } from 'vitepress'
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import packageJson from '../../package.json' with { type: "json" };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const nav: DefaultTheme.NavItem[] = [
+	{ text: 'Home', link: '/' },
+	{ text: 'Guide', link: '/guide/getting-started' },
+	{ text: 'API', link: '/api/constructor' },
+	{ text: 'Examples', link: '/examples/' },
+];
+
+function buildNav(): DefaultTheme.NavItem[] {
+	nav.push({
+		text: packageJson.version,
+		items: [
+			{ text: 'Changelog', link: 'https://github.com/nDriaDev/futurable/blob/main/CHANGELOG.md' }
+		]
+	});
+	return nav;
+}
+
 export default defineConfig({
 	title: 'Futurable',
 	description: "JavaScript's Promise and Fetch APIs with superpowers!",
@@ -34,12 +53,7 @@ export default defineConfig({
 	themeConfig: {
 		logo: '/Futurable.png',
 
-		nav: [
-			{ text: 'Home', link: '/' },
-			{ text: 'Guide', link: '/guide/getting-started' },
-			{ text: 'API', link: '/api/constructor' },
-			{ text: 'Examples', link: '/examples/' },
-		],
+		nav: buildNav(),
 
 		sidebar: {
 			'/guide/': [
