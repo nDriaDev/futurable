@@ -155,5 +155,4 @@ if (!result.success) {
 
 - [safe()](/api/safe) — resolve to a result object instead of throwing
 - [futurizable()](/api/futurizable) — convert an existing Promise into a Futurable
-- [Static: resolve()](/api/static-resolve) — wrap a known value
 - [FuturableTask.try()](/api-task/try) — lazy equivalent for FuturableTask

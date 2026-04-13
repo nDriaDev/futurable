@@ -538,6 +538,5 @@ const task = FuturableTask
 - [API Reference: retry()](/api-task/retry) — retry configuration
 - [API Reference: timeout()](/api-task/timeout) — timeout configuration
 - [API Reference: runSafe()](/api-task/run-safe) — safe execution API
-- [API Reference: catchError()](/api-task/catch-error) — error recovery
 - [API Reference: orElse()](/api-task/or-else) — alternative task on failure
 - [API Reference: fallbackTo()](/api-task/fallback-to) — static fallback value
