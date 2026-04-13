@@ -1165,4 +1165,83 @@ export class Futurable<T> extends Promise<T> {
 	static safe<T, E = unknown>(executor: FuturableExecutor<T>, signal?: AbortSignal): Futurable<SafeResult<T, E>> {
 		return new Futurable(executor, signal).safe<E>();
 	}
+
+	/**
+	 * Takes a callback of any kind (synchronous, asynchronous, returning or throwing) and
+	 * wraps its result in a Futurable. Unlike `Futurable.resolve(fn())`, this method catches
+	 * synchronous errors and turns them into rejections, and unlike `.then(fn)` it calls
+	 * the function synchronously.
+	 *
+	 * This is the Futurable equivalent of `Promise.try()` — the entry point for unifying
+	 * sync and async code paths into a single cancellable Futurable chain.
+	 *
+	 * Supports optional cancellation via an `AbortSignal` passed as the **last argument**.
+	 * If the last argument is an `AbortSignal` instance, it is extracted and used as the
+	 * cancellation signal rather than being forwarded to the callback.
+	 *
+	 * > ⚠️ **Known limitation:** if your callback intentionally expects an `AbortSignal`
+	 * > as its last parameter, it will be intercepted as a cancellation signal and **not**
+	 * > forwarded to the function. In that case, close over the signal manually instead:
+	 * > ```typescript
+	 * > const signal = new AbortController().signal;
+	 * > Futurable.try(() => myFn(signal)); // signal is NOT intercepted here
+	 * > ```
+	 *
+	 * @template T - The type of value the callback returns or resolves to
+	 * @template U - The tuple type of arguments forwarded to the callback
+	 *
+	 * @param func - A function that may return a value, throw synchronously, or return a
+	 *               Promise/Futurable. Receives all arguments preceding the optional signal.
+	 * @param args - Arguments forwarded to `func`. If the last argument is an `AbortSignal`,
+	 *               it is used as a cancellation signal and not passed to `func`.
+	 *
+	 * @returns A Futurable that is already fulfilled (if `func` returned synchronously),
+	 *          already rejected (if `func` threw synchronously), or asynchronously settled
+	 *          (if `func` returned a Promise/Futurable). The Futurable respects the provided
+	 *          signal if one was passed as the last argument.
+	 *
+	 * @example
+	 * ```typescript
+	 * // Unifies sync and async callbacks without try-catch
+	 * function doSomething(action: () => unknown) {
+	 *   return Futurable.try(action)
+	 *     .then(result => console.log(result))
+	 *     .catch(error => console.error(error))
+	 *     .finally(() => console.log('Done'));
+	 * }
+	 *
+	 * doSomething(() => 'Sync result');                  // works
+	 * doSomething(() => { throw new Error(); });         // caught
+	 * doSomething(async () => 'Async result');           // works
+	 * doSomething(async () => { throw new Error(); });   // caught
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // ⚠️ Limitation: if your callback expects an AbortSignal as last param,
+	 * // close over it manually to avoid interception
+	 * const mySignal = new AbortController().signal;
+	 *
+	 * // ❌ mySignal gets intercepted, NOT passed to the callback
+	 * Futurable.try((signal) => myFn(signal), mySignal);
+	 *
+	 * // ✅ correct approach: close over the signal
+	 * Futurable.try(() => myFn(mySignal));
+	 * ```
+	 */
+	static try<T>(func: () => T | PromiseLike<T> | FuturableLike<T>, signal?: AbortSignal): Futurable<Awaited<T>>;
+	static try<T, U extends unknown[]>(func: (...args: U) => T | PromiseLike<T> | FuturableLike<T>, ...args: U): Futurable<Awaited<T>>;
+	static try<T, U extends unknown[]>(func: (...args: U) => T | PromiseLike<T> | FuturableLike<T>, ...args: U): Futurable<Awaited<T>> {
+		const lastArg = args[args.length - 1];
+		const signal = lastArg instanceof AbortSignal ? lastArg as AbortSignal : undefined;
+		const callArgs = signal ? args.slice(0, -1) as unknown as U : args;
+
+		return new Futurable<Awaited<T>>((resolve, reject) => {
+			try {
+				resolve(func(...callArgs) as Awaited<T> | PromiseLike<Awaited<T>>);
+			} catch (error) {
+				reject(error);
+			}
+		}, signal);
+	}
 }

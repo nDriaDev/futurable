@@ -1898,6 +1898,71 @@ export class FuturableTask<T> {
 	}
 
 	/**
+	 * Creates a lazy FuturableTask from a callback of any kind — synchronous, asynchronous,
+	 * returning or throwing. Unlike `FuturableTask.of()`, which relies on the executor pattern,
+	 * `FuturableTask.try()` wraps any plain function and captures synchronous errors as
+	 * rejections, mirroring the semantics of `Promise.try()`.
+	 *
+	 * The callback is NOT invoked until `run()` is called (lazy semantics are preserved).
+	 * Each call to `run()` invokes the callback independently.
+	 *
+	 * @template U - The type of value the callback returns or resolves to
+	 * @param func - A function that may return a value, throw synchronously, or return a Promise
+	 * @param signal - Optional AbortSignal for the task
+	 * @returns A new FuturableTask wrapping the callback
+	 *
+	 * @example
+	 * ```typescript
+	 * // Safely wrapping a function that may throw synchronously
+	 * const task = FuturableTask.try(() => JSON.parse(rawInput));
+	 * const result = await task.runSafe();
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // Works with async functions too
+	 * const task = FuturableTask.try(async () => {
+	 *   const res = await fetch('/api/data');
+	 *   return res.json();
+	 * });
+	 *
+	 * await task.run();
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // Equivalent async/sync handling in a pipeline
+	 * function buildTask(action: () => unknown) {
+	 *   return FuturableTask.try(action)
+	 *     .map(result => transform(result))
+	 *     .retry(3);
+	 * }
+	 *
+	 * buildTask(() => 'sync value');
+	 * buildTask(async () => fetchData());
+	 * buildTask(() => { throw new Error('sync error'); }); // caught on run()
+	 * ```
+	 *
+	 * @example
+	 * ```typescript
+	 * // With external signal
+	 * const controller = new AbortController();
+	 * const task = FuturableTask.try(() => expensiveOperation(), controller.signal);
+	 * task.run();
+	 * controller.abort(); // cancels the execution
+	 * ```
+	 */
+	static try<U>(func: () => U | Promise<U>, signal?: AbortSignal): FuturableTask<U> {
+		return new FuturableTask<U>((res, rej) => {
+			try {
+				res(func() as U | PromiseLike<U>);
+			} catch (error) {
+				rej(error);
+			}
+		}, signal);
+	}
+
+	/**
 	 * Executes all tasks in parallel and resolves when all complete.
 	 *
 	 * All tasks run concurrently. If any task fails, the combined task
