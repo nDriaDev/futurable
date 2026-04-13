@@ -31,6 +31,37 @@ try {
 }
 ```
 
+### Using try()
+
+For code that may be synchronous or asynchronous — and may throw synchronously:
+
+```typescript
+// Safe entry point: catches synchronous throws that Futurable.resolve(fn()) would miss
+const result = await Futurable.try(() => JSON.parse(rawInput))
+  .safe();
+
+if (result.success) {
+  console.log('Parsed:', result.data);
+} else {
+  console.error('Invalid JSON:', result.error);
+}
+```
+
+`Futurable.try()` is particularly useful when you don't control whether a callback is sync or async:
+
+```typescript
+function execute(action: () => unknown) {
+  return Futurable.try(action)
+    .then(result => console.log('Result:', result))
+    .catch(error => console.error('Error:', error));
+}
+
+execute(() => 'sync value');                       // ✅
+execute(() => { throw new Error('sync error'); }); // ✅ caught
+execute(async () => 'async value');                // ✅
+execute(async () => { throw new Error(); });       // ✅ caught
+```
+
 ### Using safe()
 
 For explicit error handling without try-catch:
@@ -49,19 +80,38 @@ if (result.success) {
 
 ## Cancellation Errors
 
-When a Futurable is cancelled, it throws an AbortError:
+## Cancellation
+
+When a Futurable is cancelled, it stops executing silently — it neither resolves nor rejects.
+This means `.catch()` is **not** called on cancellation, and any pending `.then()` callbacks
+are also skipped.
+
+The only exception is `fetch`: if a fetch request is in progress and the Futurable is cancelled,
+the underlying network request is aborted. Futurable silently suppresses the resulting `AbortError`
+internally, so your `.catch()` handler is not triggered for cancellations either.
 
 ```typescript
 const request = Futurable.fetch('/api/data')
+  .then(res => res.json())
   .catch(error => {
-    if (error.name === 'AbortError') {
-      console.log('Request was cancelled');
-      return null;
-    }
-    throw error; // Re-throw other errors
+    // ⚠️ This is NOT called when cancel() is used
+    // It is only called for genuine network errors
+    console.error('Request failed:', error);
+    return null;
   });
 
-// Cancel after 1 second
+// Cancel after 1 second — no error is thrown or caught
+setTimeout(() => request.cancel(), 1000);
+```
+
+If you need to react to cancellation, use `onCancel()`:
+
+```typescript
+const request = Futurable.fetch('/api/data')
+  .onCancel(() => {
+    console.log('Request was cancelled');
+  });
+
 setTimeout(() => request.cancel(), 1000);
 ```
 
@@ -329,6 +379,7 @@ class CircuitBreaker {
 
 ## See Also
 
+- [try()](/api/static-try) - Unified sync/async entry point with error capture
 - [safe()](/api/safe) - Safe error handling
 - [catch()](/api/catch) - Traditional error catching
 - [onCancel()](/api/on-cancel) - Cancellation callbacks

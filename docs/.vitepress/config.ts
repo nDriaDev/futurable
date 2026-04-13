@@ -104,7 +104,8 @@ export default defineConfig({
 						{ text: 'Futurable.sleep()', link: '/api/static-sleep' },
 						{ text: 'Futurable.delay()', link: '/api/static-delay' },
 						{ text: 'Futurable.fetch()', link: '/api/static-fetch' },
-						{ text: 'Futurable.futurizable()', link: '/api/static-futurizable' }
+						{ text: 'Futurable.futurizable()', link: '/api/static-futurizable' },
+						{ text: 'Futurable.try()', link: '/api/static-try' }
 					]
 				},
 				{
@@ -162,7 +163,8 @@ export default defineConfig({
 						{ text: 'cancel()', link: '/api-task/cancel' },
 						{ text: 'onCancel()', link: '/api-task/on-cancel' },
 						{ text: 'signal', link: '/api-task/signal' },
-						{ text: 'memoize()', link: '/api-task/memoize' }
+						{ text: 'memoize()', link: '/api-task/memoize' },
+						{ text: 'try()', link: '/api-task/try' }
 					]
 				},
 				{

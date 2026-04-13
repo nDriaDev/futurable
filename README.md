@@ -12,8 +12,8 @@
   ![npm downloads](https://img.shields.io/npm/dt/%40ndriadev/futurable?label=DOWNLOADS&color=red&style=for-the-badge)
   ![license](https://img.shields.io/npm/l/@ndriadev/futurable?color=blue&style=for-the-badge)
 
-  ![coverage statements](https://img.shields.io/badge/statements-100%25-brightgreen.svg?style=for-the-badge)
-  ![coverage branches](https://img.shields.io/badge/branches-96.24%25-brightgreen.svg?style=for-the-badge)
+  ![coverage statements](https://img.shields.io/badge/statements-98.9%25-brightgreen.svg?style=for-the-badge)
+  ![coverage branches](https://img.shields.io/badge/branches-94.23%25-brightgreen.svg?style=for-the-badge)
   ![coverage functions](https://img.shields.io/badge/functions-100%25-brightgreen.svg?style=for-the-badge)
   ![coverage lines](https://img.shields.io/badge/lines-100%25-brightgreen.svg?style=for-the-badge)
 
@@ -41,7 +41,7 @@ JavaScript's native Promise API offers none of these. AbortController exists but
 
 **Futurable** fills this gap with two complementary primitives:
 
-1. **`Futurable`**: A Promise with superpowers—cancellable, chainable, and resource-aware
+1. **`Futurable`**: A Promise with superpowers — cancellable, chainable, and resource-aware
 2. **`FuturableTask`**: A lazy computation model for functional async composition
 
 Together, they provide everything you need to write **robust, maintainable, production-ready async code**.
@@ -54,7 +54,7 @@ Together, they provide everything you need to write **robust, maintainable, prod
 
 `Futurable` extends the native Promise API with built-in cancellation support. It's a **drop-in replacement** for Promise that solves the resource management problem.
 
-**The core insight:** When you navigate away from a page, close a modal, or change a filter, you don't just want to ignore pending operations—you want to **actively stop** them and **clean up resources**.
+**The core insight:** When you navigate away from a page, close a modal, or change a filter, you don't just want to ignore pending operations — you want to **actively stop** them and **clean up resources**.
 
 ```typescript
 import { Futurable } from '@ndriadev/futurable';
@@ -90,9 +90,9 @@ Use `Futurable` when you need **immediate execution** with cancellation support:
 
 ### FuturableTask: Lazy Async Composition
 
-`FuturableTask` represents a **blueprint** for async work—it doesn't execute until you explicitly run it. Think of it as a recipe: you write it once, then bake it multiple times with different ingredients.
+`FuturableTask` represents a **blueprint** for async work — it doesn't execute until you explicitly run it. Think of it as a recipe: you write it once, then execute it multiple times independently.
 
-**The core insight:** Many async operations benefit from **lazy evaluation**—separating the definition of work from its execution enables powerful patterns like retry, memoization, and functional composition.
+**The core insight:** Many async operations benefit from **lazy evaluation** — separating the definition of work from its execution enables powerful patterns like retry, memoization, and functional composition.
 
 ```typescript
 import { FuturableTask } from '@ndriadev/futurable';
@@ -101,7 +101,6 @@ import { FuturableTask } from '@ndriadev/futurable';
 const fetchUser = FuturableTask
   .fetch('/api/user')
   .map(res => res.json())
-  .filter(user => user.active)
   .retry(3)
   .timeout(5000)
   .memoize();
@@ -117,7 +116,7 @@ const sameUser = await fetchUser.run();
 
 - **Reusability**: Define once, execute many times
 - **Composition**: Chain transformations before execution
-- **Testing**: Easy to test without execution
+- **Testing**: Easy to test without side effects at definition time
 - **Optimization**: Memoization, batching, and deduplication
 - **Declarative**: Describe what should happen, not when
 
@@ -139,7 +138,7 @@ Use `FuturableTask` when you need **lazy evaluation** with advanced composition:
 
 #### Cancellation
 
-Stop operations and clean up resources:
+Stop operations and clean up resources. When cancelled, a Futurable stops silently — it neither resolves nor rejects. Use `onCancel()` to react to cancellation:
 
 ```typescript
 const request = Futurable.fetch('/api/data')
@@ -148,7 +147,7 @@ const request = Futurable.fetch('/api/data')
     console.log('Cleanup: close connections, clear timers');
   });
 
-// Cancel anytime
+// Cancel anytime — onCancel callback fires, then/catch are not called
 request.cancel();
 ```
 
@@ -157,19 +156,20 @@ request.cancel();
 Native support for common patterns:
 
 ```typescript
-// Sleep/delay
-await Futurable.sleep(1000);
+// Sleep
+await Futurable.sleep({ timer: 1000 });
 
 // Delayed execution
-const result = await new Futurable(resolve => {
-  resolve('value');
-}).delay(() => 'delayed', 2000);
+const result = await Futurable.resolve('value')
+  .delay(val => val.toUpperCase(), 2000);
 
 // Polling
-const status = await Futurable.polling(
+const controller = Futurable.polling(
   () => checkStatus(),
-  1000 // every second
+  { interval: 1000, immediate: true }
 );
+// Stop later
+controller.cancel();
 
 // Cancellable fetch
 const data = await Futurable.fetch('/api/data')
@@ -192,6 +192,28 @@ if (result.success) {
 }
 ```
 
+#### Unified Sync/Async Entry Point
+
+Wrap any function — synchronous or asynchronous, throwing or returning — into a Futurable safely:
+
+```typescript
+// Catches synchronous throws that Futurable.resolve(fn()) would miss
+const parsed = await Futurable.try(() => JSON.parse(rawInput))
+  .safe();
+
+// Works equally well with async functions
+const data = await Futurable.try(async () => {
+  const res = await fetch('/api/data');
+  return res.json();
+});
+
+// Unify sync and async callbacks in one interface
+function execute(action: () => unknown) {
+  return Futurable.try(action)
+    .catch(err => console.error('Caught:', err));
+}
+```
+
 ---
 
 ### For FuturableTask
@@ -204,7 +226,6 @@ Build complex pipelines declaratively:
 const pipeline = FuturableTask
   .fetch('/api/users')
   .map(res => res.json())
-  .filter(users => users.length > 0)
   .map(users => users.filter(u => u.active))
   .map(users => users.sort((a, b) => a.name.localeCompare(b.name)))
   .tap(users => console.log(`Found ${users.length} active users`));
@@ -219,13 +240,10 @@ Sophisticated error handling strategies:
 ```typescript
 const resilient = FuturableTask
   .fetch('/api/data')
-  .retry(3, {
-    delay: 1000,
-    backoff: 2  // exponential backoff
-  })
   .timeout(5000)
-  .orElse(() => FuturableTask.fetch('/api/backup'))
-  .fallbackTo(() => CACHED_DATA);
+  .retry(3, 1000)                                          // retry 3 times, 1s delay
+  .orElse(() => FuturableTask.fetch('/api/backup'))        // fallback to backup
+  .fallbackTo(CACHED_DATA);                                // static fallback value
 ```
 
 #### Concurrency Control
@@ -236,7 +254,7 @@ Fine-grained control over parallel execution:
 // Limit concurrent requests
 const limiter = FuturableTask.createLimiter(5, {
   onActive: () => console.log('Task started'),
-  onIdle: () => console.log('All done')
+  onIdle:   () => console.log('All done')
 });
 
 const tasks = urls.map(url =>
@@ -252,14 +270,17 @@ const results = await FuturableTask.parallel(tasks).run();
 Automatic debouncing for user input:
 
 ```typescript
-const search = FuturableTask
-  .of((query: string) => searchAPI(query))
+const searchTask = FuturableTask
+  .of(async (utils) => {
+    const res = await utils.fetch('/api/search?q=' + currentQuery);
+    return res.json();
+  })
   .debounce(300);
 
-// Rapid calls - only last executes
-search.run('a');   // cancelled
-search.run('ab');  // cancelled
-search.run('abc'); // executes after 300ms
+// Rapid calls — only the last one executes after 300ms
+searchTask.run(); // cancelled
+searchTask.run(); // cancelled
+searchTask.run(); // executes after 300ms
 ```
 
 #### Memoization
@@ -277,6 +298,27 @@ const config2 = await loadConfig.run(); // Cached
 const config3 = await loadConfig.run(); // Cached
 ```
 
+#### Lazy Sync/Async Entry Point
+
+Create a lazy task from any function — sync or async — with automatic error capture:
+
+```typescript
+// Sync function that may throw — error captured lazily on run()
+const parseTask = FuturableTask.try(() => JSON.parse(rawInput));
+
+// Compose freely before executing
+const result = await parseTask
+  .map(data => data.value)
+  .retry(2)
+  .runSafe();
+
+if (result.success) {
+  console.log('Parsed value:', result.data);
+} else {
+  console.error('Failed:', result.error);
+}
+```
+
 ---
 
 ## 💡 Real-World Examples
@@ -290,9 +332,11 @@ import { Futurable } from '@ndriadev/futurable';
 function UserProfile({ userId }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     setLoading(true);
+    setError(null);
 
     const request = Futurable
       .fetch(`/api/users/${userId}`)
@@ -301,18 +345,22 @@ function UserProfile({ userId }) {
         setUser(data);
         setLoading(false);
       })
-      .catch(error => {
-        if (error.name !== 'AbortError') {
-          console.error(error);
-        }
+      .catch(err => {
+        // Only called for genuine errors, not cancellation
+        setError(err);
+        setLoading(false);
+      })
+      .onCancel(() => {
+        // Called when the component unmounts or userId changes
         setLoading(false);
       });
 
-    // Cleanup on unmount or userId change
+    // Cleanup: cancel on unmount or userId change
     return () => request.cancel();
   }, [userId]);
 
   if (loading) return <div>Loading...</div>;
+  if (error)   return <div>Error: {error.message}</div>;
   return <div>{user?.name}</div>;
 }
 ```
@@ -323,12 +371,11 @@ function UserProfile({ userId }) {
 class APIClient {
   private baseURL = 'https://api.example.com';
 
-  // Reusable task definitions
   fetchUser = (id: number) =>
     FuturableTask
       .fetch(`${this.baseURL}/users/${id}`)
       .map(res => res.json())
-      .retry(3)
+      .retry(3, 500)
       .timeout(5000)
       .memoize();
 
@@ -336,10 +383,8 @@ class APIClient {
     FuturableTask
       .fetch(`${this.baseURL}/users/search?q=${query}`)
       .map(res => res.json())
-      .debounce(300)
       .timeout(10000);
 
-  // Execute when needed
   async getUser(id: number) {
     return this.fetchUser(id).run();
   }
@@ -357,7 +402,7 @@ const processData = FuturableTask
   .fetch('/api/raw-data')
   .map(res => res.json())
   .tap(data => console.log(`Received ${data.length} items`))
-  .filter(data => data.length > 0, 'No data available')
+  .map(data => data.filter(item => item.active))
   .map(data => data.map(item => ({
     ...item,
     processed: true,
@@ -370,11 +415,11 @@ const processData = FuturableTask
     )
   )
   .tap(results => console.log(`Processed ${results.length} items`))
-  .retry(2, { delay: 1000 })
+  .retry(2, 1000)
   .timeout(30000)
-  .fallbackTo(error => {
+  .catchError(error => {
     console.error('Pipeline failed:', error);
-    return [];
+    return FuturableTask.resolve([]);
   });
 
 const results = await processData.run();
@@ -384,14 +429,12 @@ const results = await processData.run();
 
 ```typescript
 async function processLargeDataset(items: Item[]) {
-  // Create limiter (max 10 concurrent)
   const limiter = FuturableTask.createLimiter(10, {
-    onActive: () => console.log(`Active: ${limiter.activeCount}/10`),
+    onActive:    () => console.log(`Active: ${limiter.activeCount}/10`),
     onCompleted: (result) => updateProgress(result),
-    onIdle: () => console.log('Batch complete')
+    onIdle:      () => console.log('Batch complete')
   });
 
-  // Process in batches of 50
   const batches = chunk(items, 50);
 
   const results = await FuturableTask.sequence(
@@ -401,7 +444,7 @@ async function processLargeDataset(items: Item[]) {
           limiter(
             FuturableTask
               .of(() => processItem(item))
-              .retry(3)
+              .retry(3, 500)
               .timeout(5000)
           )
         )
@@ -435,7 +478,7 @@ request.cancel();
 const resilient = FuturableTask
   .fetch('/api/data')
   .map(res => res.json())
-  .retry(3)
+  .retry(3, 500)
   .timeout(5000);
 ```
 
@@ -445,10 +488,10 @@ Full TypeScript support with inference:
 
 ```typescript
 const result = await FuturableTask
-  .of(() => 42)                    // FuturableTask<number>
-  .map(x => x.toString())          // FuturableTask<string>
-  .filter(s => s.length > 0)       // FuturableTask<string>
-  .run();                          // Promise<string>
+  .of(() => 42)               // FuturableTask<number>
+  .map(x => x.toString())     // FuturableTask<string>
+  .map(s => s.length)         // FuturableTask<number>
+  .run();                     // Promise<number>
 ```
 
 ### 3. Zero Dependencies
@@ -500,7 +543,7 @@ import { FuturableTask } from '@ndriadev/futurable';
 const task = FuturableTask
   .of(() => fetch('/api/data'))
   .map(res => res.json())
-  .retry(3);
+  .retry(3, 500);
 
 // Execute when ready
 const data = await task.run();
@@ -525,12 +568,13 @@ const data = await task.run();
 
 | Feature | Description |
 |---------|-------------|
-| ✅ **Cancellation** | Cancel operations and cleanup resources |
+| ✅ **Cancellation** | Cancel operations and cleanup resources via `onCancel()` |
 | ✅ **Promise Compatible** | Drop-in Promise replacement |
 | ✅ **Built-in Fetch** | Cancellable HTTP requests |
 | ✅ **Delays & Sleep** | Timing utilities |
-| ✅ **Polling** | Repeated execution with cancellation |
-| ✅ **Safe Mode** | Error handling without try-catch |
+| ✅ **Polling** | Repeated execution with cancellation control |
+| ✅ **Safe Mode** | Error handling without try-catch via `.safe()` |
+| ✅ **try()** | Unified sync/async entry point with error capture |
 | ✅ **Full TypeScript** | Complete type safety |
 
 ### FuturableTask
@@ -538,14 +582,15 @@ const data = await task.run();
 | Feature | Description |
 |---------|-------------|
 | ✅ **Lazy Evaluation** | Define once, execute when needed |
-| ✅ **Reusability** | Run the same task multiple times |
-| ✅ **Functional Composition** | map, filter, flatMap, tap, and more |
-| ✅ **Retry Logic** | Exponential backoff and conditional retry |
-| ✅ **Timeout Protection** | Automatic timeouts |
-| ✅ **Error Recovery** | Fallbacks and error handling |
+| ✅ **Reusability** | Run the same task multiple times independently |
+| ✅ **Functional Composition** | map, flatMap, tap, fold, zip, and more |
+| ✅ **Retry Logic** | Configurable retries with optional fixed delay |
+| ✅ **Timeout Protection** | Automatic timeouts with custom reason |
+| ✅ **Error Recovery** | catchError, orElse, fallbackTo |
 | ✅ **Concurrency Control** | Rate limiting and parallelism |
-| ✅ **Debouncing** | Built-in debouncing |
+| ✅ **Debouncing & Throttling** | Built-in debounce and throttle |
 | ✅ **Memoization** | Cache expensive operations |
+| ✅ **try()** | Lazy sync/async entry point with automatic error capture |
 | ✅ **Full TypeScript** | Complete type inference |
 
 ---
