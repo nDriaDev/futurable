@@ -967,6 +967,79 @@ describe('FuturableTask', () => {
 			});
 		});
 
+		describe('Static: try', () => {
+			it('should resolve with a synchronous return value', async () => {
+				const task = FuturableTask.try(() => 42);
+				await expect(task.run()).resolves.toBe(42);
+			});
+
+			it('should reject when the function throws synchronously', async () => {
+				const error = new Error('sync error');
+				const task = FuturableTask.try(() => { throw error; });
+				await expect(task.run()).rejects.toBe(error);
+			});
+
+			it('should resolve with an async function result', async () => {
+				const task = FuturableTask.try(async () => 'async result');
+				await expect(task.run()).resolves.toBe('async result');
+			});
+
+			it('should reject when an async function throws', async () => {
+				const error = new Error('async error');
+				const task = FuturableTask.try(async () => { throw error; });
+				await expect(task.run()).rejects.toBe(error);
+			});
+
+			it('should resolve when the function returns a resolved Promise', async () => {
+				const task = FuturableTask.try(() => Promise.resolve(99));
+				await expect(task.run()).resolves.toBe(99);
+			});
+
+			it('should reject when the function returns a rejected Promise', async () => {
+				const task = FuturableTask.try(() => Promise.reject('promise error'));
+				await expect(task.run()).rejects.toBe('promise error');
+			});
+
+			it('should be lazy — not call the function until run()', () => {
+				const fn = vi.fn(() => 1);
+				FuturableTask.try(fn);
+				expect(fn).not.toHaveBeenCalled();
+			});
+
+			it('should call the function on each run() independently', async () => {
+				let count = 0;
+				const task = FuturableTask.try(() => ++count);
+				await task.run();
+				await task.run();
+				expect(count).toBe(2);
+			});
+
+			it('should support external signal', () => {
+				const controller = new AbortController();
+				const task = FuturableTask.try(() => 'value', controller.signal);
+				expect(task.signal.aborted).toBe(false);
+				controller.abort();
+				expect(task.signal.aborted).toBe(true);
+			});
+
+			it('should be a FuturableTask instance', () => {
+				const task = FuturableTask.try(() => 1);
+				expect(task).toBeInstanceOf(FuturableTask);
+			});
+
+			it('should be composable with map and retry', async () => {
+				const task = FuturableTask.try(() => JSON.parse('{"n":5}'))
+					.map((obj: any) => obj.n * 2);
+				await expect(task.run()).resolves.toBe(10);
+			});
+
+			it('should capture sync errors via runSafe()', async () => {
+				const task = FuturableTask.try(() => JSON.parse('invalid json'));
+				const result = await task.runSafe();
+				expect(result.success).toBe(false);
+			});
+		});
+
 		describe('Static: all', () => {
 			it('should wait for all tasks', async () => {
 				const tasks = [

@@ -1118,6 +1118,73 @@ describe('Futurable', () => {
 		});
 	});
 
+	describe('Static: try', () => {
+		it('should resolve with a synchronous return value', async () => {
+			const futurable = Futurable.try(() => 42);
+			await expect(futurable).resolves.toBe(42);
+		});
+
+		it('should reject when the function throws synchronously', async () => {
+			const error = new Error('sync error');
+			const futurable = Futurable.try(() => { throw error; });
+			await expect(futurable).rejects.toBe(error);
+		});
+
+		it('should resolve with an async function result', async () => {
+			const futurable = Futurable.try(async () => 'async result');
+			await expect(futurable).resolves.toBe('async result');
+		});
+
+		it('should reject when an async function throws', async () => {
+			const error = new Error('async error');
+			const futurable = Futurable.try(async () => { throw error; });
+			await expect(futurable).rejects.toBe(error);
+		});
+
+		it('should resolve when the function returns a resolved Promise', async () => {
+			const futurable = Futurable.try(() => Promise.resolve(99));
+			await expect(futurable).resolves.toBe(99);
+		});
+
+		it('should reject when the function returns a rejected Promise', async () => {
+			const futurable = Futurable.try(() => Promise.reject('promise error'));
+			await expect(futurable).rejects.toBe('promise error');
+		});
+
+		it('should resolve when the function returns a resolved Futurable', async () => {
+			const futurable = Futurable.try(() => Futurable.resolve(7));
+			await expect(futurable).resolves.toBe(7);
+		});
+
+		it('should support cancellation via signal', () => {
+			const controller = new AbortController();
+			const futurable = Futurable.try(() => 'value', controller.signal);
+			controller.abort();
+			expect(futurable.signal.aborted).toBe(true);
+		});
+
+		it('should be a Futurable instance', () => {
+			const futurable = Futurable.try(() => 1);
+			expect(futurable).toBeInstanceOf(Futurable);
+		});
+
+		it('should be chainable with then/catch/safe', async () => {
+			const result = await Futurable.try(() => JSON.parse('{"value":42}'))
+				.then((obj: any) => obj.value)
+				.safe();
+
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.data).toBe(42);
+			}
+		});
+
+		it('should capture JSON.parse failure as rejection via safe()', async () => {
+			const result = await Futurable.try(() => JSON.parse('invalid json')).safe();
+			expect(result.success).toBe(false);
+		});
+	});
+
 	describe('FuturableUtils', () => {
 		it('should provide working delay in utils', async () => {
 			const futurable = new Futurable((resolve, reject, { delay }) => {
