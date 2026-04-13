@@ -7,6 +7,9 @@
 			"DOM.Iterable",
 			"ESNext"
 		],
+		"types": [
+			"node"
+		],
 		"allowJs": false,
 		"allowSyntheticDefaultImports": true,
 		"strict": true,
