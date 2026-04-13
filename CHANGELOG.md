@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.3.0](https://github.com/nDriaDev/futurable/releases/tag/v3.3.0) - 2026-04-13
+
+### Features
+
+- try method implementation ([6cbedda](https://github.com/nDriaDev/futurable/commit/6cbedda))
+
+### Documentation
+
+- update documentation ([9fb0890](https://github.com/nDriaDev/futurable/commit/9fb0890))
+
+### Tests
+
+- update test previous feat ([1d1d460](https://github.com/nDriaDev/futurable/commit/1d1d460))
+
+### Chores
+
+- ts config ([ae41406](https://github.com/nDriaDev/futurable/commit/ae41406))
+- refactor verify-build script ([ff08c8f](https://github.com/nDriaDev/futurable/commit/ff08c8f))
+- add github workflow security audit + fix release script ([d17f3de](https://github.com/nDriaDev/futurable/commit/d17f3de))
+
 ## [3.2.3](https://github.com/nDriaDev/futurable/releases/tag/v3.2.3) - 2026-04-08
 
 ### Chores
