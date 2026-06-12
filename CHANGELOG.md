@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.3.1](https://github.com/nDriaDev/futurable/releases/tag/v3.3.1) - 2026-06-12
+
+### Bug Fixes
+
+- Update autofix-publish.yml ([1324e9a](https://github.com/nDriaDev/futurable/commit/1324e9a))
+
+### Documentation
+
+- update documentations ([b8696d4](https://github.com/nDriaDev/futurable/commit/b8696d4))
+
+### Chores
+
+- update dependencies ([c6f11b3](https://github.com/nDriaDev/futurable/commit/c6f11b3))
+- update autofix workflow ([1c9eb4d](https://github.com/nDriaDev/futurable/commit/1c9eb4d))
+
+### Other Changes
+
+- Merge remote-tracking branch 'origin/main' ([5328a87](https://github.com/nDriaDev/futurable/commit/5328a87))
+
 ## [3.3.0](https://github.com/nDriaDev/futurable/releases/tag/v3.3.0) - 2026-04-13
 
 ### Features
