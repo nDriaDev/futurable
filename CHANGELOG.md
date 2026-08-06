@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.2](https://github.com/nDriaDev/futurable/releases/tag/v3.3.2) - 2026-08-06
+
+### Chores
+
+- update dependencies ([1cb9423](https://github.com/nDriaDev/futurable/commit/1cb9423))
+- update release script CI mode ([40604d0](https://github.com/nDriaDev/futurable/commit/40604d0))
+
 ## [3.3.1](https://github.com/nDriaDev/futurable/releases/tag/v3.3.1) - 2026-06-12
 
 ### Bug Fixes
