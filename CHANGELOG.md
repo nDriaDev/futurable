@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.3](https://github.com/nDriaDev/futurable/releases/tag/v3.3.3) - 2026-09-10
+
+### Chores
+
+- update dependencies ([bb64d18](https://github.com/nDriaDev/futurable/commit/bb64d18))
+- fix autofix-publish workflow ([539627d](https://github.com/nDriaDev/futurable/commit/539627d))
+
 ## [3.3.2](https://github.com/nDriaDev/futurable/releases/tag/v3.3.2) - 2026-08-06
 
 ### Chores
