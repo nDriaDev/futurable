@@ -24,9 +24,9 @@ if [[ ! "$VERSION_TYPE" =~ ^(patch|minor|major)$ ]]; then
     exit 1
 fi
 
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}------------------------------------------------------------${NC}"
 echo -e "${BLUE}🚀 Starting Release Process - $VERSION_TYPE version bump${NC}"
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}------------------------------------------------------------${NC}"
 
 # Check if git working directory is clean
 if [ -n "$(git status --porcelain)" ]; then
@@ -128,13 +128,13 @@ echo -e "\n${BLUE}📦 Publishing to npm...${NC}"
 
 if [ "$CI" = "true" ]; then
     echo -e "${YELLOW}CI mode: publishing v$NEW_VERSION via trusted publishing (no prompt)${NC}"
-    pnpm publish --access public --provenance --no-git-checks --loglevel verbose || {
+    npm publish --access public --provenance || {
         echo -e "${RED}❌ npm publish failed${NC}"
         exit 1
     }
-    echo -e "\n${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "\n${GREEN}------------------------------------------------------------${NC}"
     echo -e "${GREEN}🎉 Release v$NEW_VERSION completed successfully!${NC}"
-    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}------------------------------------------------------------${NC}"
     echo -e "${GREEN}✅ Package published to npm${NC}"
     echo -e "${GREEN}✅ Git tag pushed to remote${NC}"
     echo -e "${GREEN}✅ Changelog updated${NC}"
@@ -153,9 +153,9 @@ else
             echo -e "${YELLOW}You can manually publish later with: pnpm publish --access public${NC}"
             exit 1
         }
-        echo -e "\n${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "\n${GREEN}------------------------------------------------------------${NC}"
         echo -e "${GREEN}🎉 Release v$NEW_VERSION completed successfully!${NC}"
-        echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${GREEN}------------------------------------------------------------${NC}"
         echo -e "${GREEN}✅ Package published to npm${NC}"
         echo -e "${GREEN}✅ Git tag pushed to remote${NC}"
         echo -e "${GREEN}✅ Changelog updated${NC}"
